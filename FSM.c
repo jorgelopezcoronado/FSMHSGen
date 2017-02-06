@@ -16,6 +16,29 @@ extern "C" {
 #endif
 
 /*
+ * fsm_ll_to_fsm_arr: function that transforms an FSM using a linked list to an FSM array
+ * */
+
+fsm_arr *fsm_ll_to_fsm_arr(fsm_ll *machine)
+{
+	fsm_arr *fsm = (fsm_arr*)malloc(sizeof(fsm_arr));
+	size_t current_index;
+	
+	if(!machine)
+		return NULL;
+	
+	fsm->size = machine->size; 
+	fsm->indices =  (size_t*)malloc(machine->size*sizeof(size_t));
+	fsm->transitions = (size_t*)malloc(machine->trans * sizeof(size_t));
+
+	//copy each index and for each index allocate transitions
+	for (current_index = 0; current_index < machine->size; current_index++)
+	{
+		
+	}
+}
+
+/*
  * create_fsm_ll_: initializes an fsmll data structure 
  */
 

@@ -37,9 +37,17 @@ typedef struct fsm_arr_tag
 {
 	size_t size;
 	size_t *indices; //array of indices
-	size_t 
+	size_t *transitions; //array of transitions
+	size_t init;
 }fsm_arr;
 #endif
+
+/*
+ * fsm_ll_to_fsm_arr: function that transforms an FSM using a linked list to an FSM array
+ * */
+
+fsm_arr *fsm_ll_to_fsm_arr(fsm_ll *machine);
+
 /*
  * create_fsm_ll_: initializes an fsmll data structure 
  */

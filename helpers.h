@@ -26,7 +26,15 @@ typedef enum
 }loglevel;	
 #endif
 
-extern loglevel log_level;
+#ifndef logtype_decl
+#define logtype_decl
+typedef enum
+{
+	none = 0,
+	local,
+	syslog_log
+}logtype;
+#endif
 
 /*
  *  * timeval_substract takes two values to substract and put the result in the result parameter.

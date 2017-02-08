@@ -76,10 +76,18 @@ char *textFromFile(char *filename)
 
 }
 
+loglevel log_level;
+logtype log_type;
+const char *log_name;
+
 int main(int argc, char **argv)
 {
 	char *input;
 	fsm_arr *fsm;
+	
+	log_level = error;
+	log_type = none;
+	log_name = "FSMHSGen.log"; 
 
 	if(argc < 2)
 	{
@@ -87,6 +95,8 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	
+	log_type = syslog_log;	
+		
 	input = textFromFile(argv[1]);
 
 	if(!input)

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <syslog.h>
 
 /*
  * helpcers.c
@@ -133,12 +134,93 @@ void print_timeval(struct timeval* tval, BOOL newline_before, BOOL newline_after
 //**
 //log in accordance to paramters
 //**/
+
+
+//define log level and log type, and log name
+extern loglevel log_level;
+extern logtype log_type; 
+extern const char *log_name;
+
+const char *loglevel_text(loglevel ll)
+{
+	switch(ll)
+	{
+		case emergency:
+			return "emergency";
+		case alert:
+			return "alert";
+		case critical:
+			return "critical";
+		case error:
+			return "error";
+		case warning:
+			return "warning";
+		case notice:
+			return "notice";
+		case info:	
+			return "into";
+		defult:
+			return "debug";
+	}
+}
+
+void log_local(loglevel ll, char *msg)
+{
+	FILE *fp = NULL;
+	fp = fopen(log_name, "a");
+	if(!fp)
+	{
+		printf("Error! Unable to open log file%s\n", log_name);
+		return;
+	}
+	if(fprintf(fp, "%s -- %s",loglevel_text(ll),  msg) < 0)
+		printf("Error could not write to log file%s\n", log_name);
+	fclose(fp);
+	
+}
+
+int loglevel_syslog(loglevel ll)
+{
+	switch(ll)
+	{
+		case emergency:
+			return LOG_EMERG;
+		case alert:
+			return LOG_ALERT;
+		case critical:
+			return LOG_CRIT;
+		case error:
+			return LOG_ERR;
+		case warning:
+			return LOG_WARNING;
+		case notice:
+			return LOG_NOTICE;
+		case info:	
+			return LOG_INFO;
+		defult:
+			return LOG_DEBUG;
+	}
+
+}
+
+void log_syslog(loglevel ll, char *msg)
+{
+	openlog ("FSMHSGen", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL7);
+	syslog(loglevel_syslog(ll), msg);
+	closelog();
+}
+
 void fsm_log(loglevel ll, char *msg)
 {
-	if (ll <= info)
+	if (ll <= error)
 	{
 		printf("%s",msg);
 	}
-	//do something else
+	
+	if(log_type == local)
+		log_local(ll,msg);
+	else if (log_type == syslog_log)
+		log_syslog(ll,msg);
+	
 }
 

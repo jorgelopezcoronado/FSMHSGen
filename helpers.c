@@ -135,7 +135,10 @@ void print_timeval(struct timeval* tval, BOOL newline_before, BOOL newline_after
 //**/
 void fsm_log(loglevel ll, char *msg)
 {
-	strtrim(&msg);
-	printf("%s\n",msg);
+	if (ll <= info)
+	{
+		printf("%s",msg);
+	}
+	//do something else
 }
 

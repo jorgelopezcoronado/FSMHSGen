@@ -1,6 +1,6 @@
 %{
 //header section insert into output
-#include "paren.h"
+#include "FSM.h"
 #include "parser.h"
 #include <stdio.h>
 %}
@@ -11,28 +11,32 @@
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge
 
-LPAREN "("
-RPAREN ")"
-LBRACK "["
-RBRACK "]"
-LCBRACK "{"
-RCBRACK "}"
+FSMTYPE "F"
+STATES "s"
+INPUTS "i"
+OUTPUTS "o"
+INITIAL "n0"
+TRANS "p"
 
+INTEGER [0-9]+
 
 WS	[ \t\r\n]+
+
+COMMENT	\/\/[^\n]*
 
 /* begin tokenizing*/
 %%
 {WS} { /*ignore white spaces, we are kind*/ }
-{LPAREN} {return TOKEN_LPAREN;}
-{RPAREN} {return TOKEN_RPAREN;}
-{LBRACK} {return TOKEN_LBRACK;}
-{RBRACK} {return TOKEN_RBRACK;}
-{LCBRACK} {return TOKEN_LCBRACK;}
-{RCBRACK} {return TOKEN_RCBRACK;}
+{COMMENT} { /*ignore comments*/ }
+{FSMTYPE} {return TOKEN_FSMTYPE;}
+{STATES} {return TOKEN_STATES;}
+{INPUTS} {return TOKEN_INPUTS;}
+{OUTPUTS} {return TOKEN_OUTPUTS;}
+{INITIAL} {return TOKEN_INITIAL;}
+{TRANS} {return TOKEN_TRANS;}
+{INTEGER} {sscanf(yytext, "%llu", &yylval->num); return TOKEN_NUMBER;}
 
-
-. { /*error */ } 
+. { printf("Warning! Unrecognized token: %s\n", yytext); } 
 
 %%
 

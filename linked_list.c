@@ -296,13 +296,15 @@ void *linked_list_delete(linked_list *ll)
 
 void delete_linked_list(linked_list *ll)
 {
-	linked_list_node *aux = ll->head;
-	while (aux != NULL)
-	{
-		ll->head = ll->head->next;
-		free(aux);	
-		aux = ll->head;
-	}
+	//linked_list_node *aux = ll->head;
+	while (ll->head)
+//	{
+		free(linked_list_delete(ll));
+//		ll->head = ll->head->next;
+//		free(aux->element);///???
+//		free(aux);	
+//		aux = ll->head;
+//	}
 	free(ll);
 }
 /*

@@ -1,33 +1,112 @@
 #include "FSM.h"
+#include "parser.h"
+#include "lexer.h"
+
 #include <stdio.h>
 
-void test_fsm_ll()
+int yyparse (fsm_ll **machine, yyscan_t scan);
+
+fsm_arr *getFSM (char *source)
 {
-	fsm_ll *myfsm = create_fsm_ll();
-	set_maxs(myfsm, 4);
-	set_maxi(myfsm, 4);
-	set_maxo(myfsm, 3);
-	set_maxt(myfsm, 8);
-	set_init(myfsm, 0);
-	
-	add_fsm_ll_transition(myfsm, 0, 1, 0, 1);
-	add_fsm_ll_transition(myfsm, 0, 0, 0, 2);
-	add_fsm_ll_transition(myfsm, 1, 3, 1, 3);
-	add_fsm_ll_transition(myfsm, 2, 1, 1, 0);
-	add_fsm_ll_transition(myfsm, 1, 1, 1, 2);
-	add_fsm_ll_transition(myfsm, 0, 2, 0, 3);
-	add_fsm_ll_transition(myfsm, 1, 3, 2, 2);
-	add_fsm_ll_transition(myfsm, 1, 0, 1, 1);
+	fsm_ll *machine = create_fsm_ll(); //root of AST
+	fsm_arr *fsm; // returning data struct
 
-	print_fsm_ll(myfsm);
+	yyscan_t scanner;
+	YY_BUFFER_STATE state;
 
-	delete_fsm_ll(myfsm);
-	
+	if (yylex_init(&scanner)) 
+	{
+		//couldn't initialize
+		return NULL;
+	}
+
+
+	state = yy_scan_string(source, scanner); //tokenize source_code
+	if (yyparse(&machine, scanner)) //retreive the AST from parser using tokenize string
+	{
+		//error parsing not your issue
+		return NULL;
+	}
+        
+	yy_delete_buffer(state, scanner);
+	yylex_destroy(scanner);
+
+	fsm = fsm_ll_to_fsm_arr(machine);
+//	delete_fsm_ll(machine);
+
+	return fsm; 
 }
-	
 
-int main()
+char *textFromFile(char *filename)
 {
-	test_fsm_ll();
+	FILE *file;
+	size_t fileSize;
+	char *text;
+		
+
+	file = fopen(filename, "rb");
+	if (!file)
+	{
+		printf("Error reading file %s!\n", filename);
+		return NULL;
+	}
+
+	fseek(file, 0, SEEK_END); 
+	fileSize = ftell(file); // what's the position of the pointer in the end of this stream?
+	rewind(file);
+	
+	text = (char*)malloc(fileSize + 1); //one mor to null terminate the string
+
+	if(!text)
+	{
+		//failed to allocate text
+		return NULL;
+	}
+	
+	if(!fread(text, 1, fileSize, file))
+	{
+		printf("Error! Unable to read the file %s!", filename);
+		free(text);
+		return NULL;
+	}
+
+	fclose(file);
+	
+	return text;
+
+}
+
+int main(int argc, char **argv)
+{
+	char *input;
+	fsm_arr *fsm;
+
+	if(argc < 2)
+	{
+		fsm_log(error, "Error! an FSM filename analyize is expected!\n");
+		exit(1);
+	}
+	
+	input = textFromFile(argv[1]);
+
+	if(!input)
+	{	
+		//no input from file
+		exit(1);
+	}
+
+	fsm = getFSM(input);
+	
+	free(input);
+	
+	if(!fsm)
+	{
+		fsm_log(error, "Error! Parse error in the file!");
+		exit(1);
+	}
+
+	print_fsm_arr(fsm);
+	delete_fsm_arr(fsm);
+	
 	return 0;
 }

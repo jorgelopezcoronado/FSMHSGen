@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <string.h>
+
 /*
  * struct definition of FSM data structures 
  */
@@ -15,28 +17,6 @@
 extern "C" {
 #endif
 
-/*
- * fsm_ll_to_fsm_arr: function that transforms an FSM using a linked list to an FSM array
- * */
-
-fsm_arr *fsm_ll_to_fsm_arr(fsm_ll *machine)
-{
-	fsm_arr *fsm = (fsm_arr*)malloc(sizeof(fsm_arr));
-	size_t current_index;
-	
-	if(!machine)
-		return NULL;
-	
-	fsm->size = machine->size; 
-	fsm->indices =  (size_t*)malloc(machine->size*sizeof(size_t));
-	fsm->transitions = (size_t*)malloc(machine->trans * sizeof(size_t));
-
-	//copy each index and for each index allocate transitions
-	for (current_index = 0; current_index < machine->size; current_index++)
-	{
-		
-	}
-}
 
 /*
  * create_fsm_ll_: initializes an fsmll data structure 
@@ -44,7 +24,7 @@ fsm_arr *fsm_ll_to_fsm_arr(fsm_ll *machine)
 
 fsm_ll *create_fsm_ll()
 {
-	fsm_ll *retds = (fsm_ll*)malloc(1*sizeof(fsm_ll));
+	fsm_ll *retds = (fsm_ll*)malloc(sizeof(fsm_ll));
 	retds->si = NULL;
 	retds->size = 0;
 	retds->maxS = 0;
@@ -66,9 +46,12 @@ fsm_ll *create_fsm_ll()
 void delete_fsm_ll (fsm_ll *machine)
 {
 	size_t i;
+	
 	for (i = 0; i < machine->size; i++)
-		if(*(machine->si + i))
-			delete_linked_list(*(machine->si + i));
+		if(machine->si[i])
+			delete_linked_list(machine->si[i]);
+
+	free(machine->si);
 	free(machine);
 }
 
@@ -104,19 +87,23 @@ void set_maxs(fsm_ll *machine, size_t states)
 {
 	if(!states)
 	{
-		fsm_log(warning, "Warning! number of states = 0 is invalid!");
+		fsm_log(warning, "Warning! number of states = 0 is invalid!\n");
 		return;
 	}
 	machine->maxS = states;
 	machine->size = machine->maxS * machine->maxI;
 	if(machine->size)
 	{
-		machine->si = (linked_list**)realloc(machine->si, machine->size * sizeof(linked_list**));
+		if(machine->si)
+			free(machine->si);
+		machine->si = (linked_list**)malloc(machine->size * sizeof(linked_list*));
 		if(!machine->si)
 		{
-			fsm_log(error, "Error! Could not allocate memory for tranitions set_maxs!");
+			fsm_log(error, "Error! Could not allocate memory for tranitions set_maxs!\n");
 			exit(error);
 		}
+		memset (machine->si, 0, machine->size * sizeof(linked_list*));	
+			
 	}
 	
 }
@@ -125,19 +112,24 @@ void set_maxi(fsm_ll *machine, size_t inputs)
 {
 	if(!inputs)
 	{
-		fsm_log(warning, "Warning! input size = 0 is invalid!");
+		fsm_log(warning, "Warning! input size = 0 is invalid!\n");
 		return;
 	}
 	machine->maxI = inputs;
 	machine->size = machine->maxS * machine->maxI;
 	if(machine->size)
 	{
-		machine->si = (linked_list**)realloc(machine->si, machine->size * sizeof(linked_list**));
+		if(machine->si)
+			free(machine->si);
+		machine->si = (linked_list**)malloc(machine->size * sizeof(linked_list*));
 		if(!machine->si)
 		{
-			fsm_log(error, "Error! Could not allocate memory for tranitions set_maxi!");
+			fsm_log(error, "Error! Could not allocate memory for tranitions set_maxi!\n");
 			exit(critical);
 		}
+
+		memset (machine->si, 0, machine->size * sizeof(linked_list*));	
+			
 	}
 	
 	machine->sizeofI = lg2(inputs);
@@ -147,7 +139,7 @@ void set_maxo(fsm_ll *machine, size_t outputs)
 {
 	if(!outputs)
 	{
-		fsm_log(warning, "Warning! output size = 0 is invalid!");
+		fsm_log(warning, "Warning! output size = 0 is invalid!\n");
 		return;
 	}
 	machine->maxO = outputs;
@@ -159,7 +151,7 @@ void set_init(fsm_ll *machine, size_t init)
 {
 	if(init >= machine->maxS)
 	{
-		fsm_log(warning, "Warning! initial state is invalid!");
+		fsm_log(warning, "Warning! initial state is invalid!\n");
 		return;
 	}
 	machine->init = init;
@@ -176,79 +168,95 @@ void set_maxt(fsm_ll *machine, size_t trans)
 
 void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t output, size_t next_state)
 {
-	size_t index, *transition_ptr;
-	char* logmsg;	
+	size_t index=0, *transition_ptr = NULL;
+	char *logmsg = NULL, *logerror = "Error! Could not write to log!\n";	
+
+	if(!machine || !machine->si)
+	{
+		logmsg =(char*)malloc(400*sizeof(char));
+		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, empty machine\n", input, state, next_state, output) < 0)
+			fsm_log(error, logerror);
+		else 
+			fsm_log(warning, logmsg);	
+		free(logmsg);
+		return;
+
+	}
+
+	//printf("insert (s=%llu,i=%llu,o=%llu,n=%llu)\n", state, input, output, next_state);
 	if(machine->trans >= machine->maxT)
 	{
-		logmsg =(char*) malloc(400);
+		logmsg =(char*)malloc(400*sizeof(char));
 		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, transition count= %llu, reached maximal transitons = %llu\n", input, state, next_state, output, machine->trans, machine->maxT ) < 0)
-			fsm_log(3, "Error! Could not write to log!");
+			fsm_log(error, logerror);
 		else 
-			fsm_log(4, logmsg);	
+			fsm_log(warning, logmsg);	
 		free(logmsg);
 		return;
 	}
 	if(state >= machine->maxS)
 	{
-		logmsg =(char*) malloc(400);
+		logmsg =(char*)malloc(400*sizeof(char));
 		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, state %llu is bigger than max_state = %llu\n", input, state, next_state, output, state, machine->maxS ) < 0)
-			fsm_log(3, "Error! Could not write to log!");
+			fsm_log(error, logerror);
 		else 
-			fsm_log(4, logmsg);	
+			fsm_log(warning, logmsg);	
 		free(logmsg);
 		return;
 	}
 	if(input >= machine->maxI)
 	{
-		logmsg =(char*) malloc(400);
+		logmsg =(char*)malloc(400*sizeof(char));
+	
 		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, input %llu is bigger than max_input = %llu\n", input, state, next_state, output, input, machine->maxI) < 0)
-			fsm_log(3, "Error! Could not write to log!");
+			fsm_log(error, logerror);
 		else 
-			fsm_log(4, logmsg);	
+			fsm_log(warning, logmsg);	
 		free(logmsg);
 		return;
 	}
 	if(output >= machine->maxO)
 	{
-		logmsg =(char*) malloc(400);
+		logmsg =(char*)malloc(1000*sizeof(char));
 		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, output %llu is bigger than max_output = %llu\n", input, state, next_state, output, output, machine->maxO) < 0)
-			fsm_log(3, "Error! Could not write to log!");
+			fsm_log(error, logerror);
 		else 
-			fsm_log(4, logmsg);	
+			fsm_log(warning, logmsg);	
 		free(logmsg);
 		return;
 	}	
 	if(next_state >= machine->maxS)
 	{
-		logmsg =(char*) malloc(400);
+		logmsg =(char*)malloc(400*sizeof(char));
 		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, next state %llu is bigger than max_state = %llu\n", input, state, next_state, output, next_state, machine->maxS) < 0)
-			fsm_log(error, "Error! Could not write to log!");
+			fsm_log(error, logerror);
 		else 
 			fsm_log(warning, logmsg);	
 		free(logmsg);
-
 		return;
 	}
 
 	index = state << machine->sizeofI  | input;
 	
 	transition_ptr  = (size_t*)malloc(sizeof(size_t));
-
 	*transition_ptr = next_state << machine->sizeofO | output;
 
-	//printf("ET index=%llu trans=%llu <-> (s=%llu,i=%llu,o=%llu,n=%llu)?\n", index, transition, state, input, output, next_state);
-	if (!*(machine->si + index))
-		*(machine->si + index) = create_linked_list(); 	
+	//printf("ET index=%llu trans=%llu <-> (s=%llu,i=%llu,o=%llu,n=%llu)?\n", index, *transition_ptr, state, input, output, next_state);
+	if (!machine->si[index])
+		machine->si[index] = create_linked_list(); 	
 	
 	
-	if(!linked_list_add(*(machine->si + index), transition_ptr))
+	if(!linked_list_add(machine->si[index], transition_ptr))
 	{
-		logmsg =(char*) malloc(400);
+		logmsg =(char*)malloc(400*sizeof(char));
 		if(sprintf(logmsg, "Warning! unable to add transition (%llu,%llu,%llu,%llu)! \n", input, state, next_state, output) < 0)
-			fsm_log(error, "Error! Could not write to log!");
+			fsm_log(error, logerror);
+		else 
+			fsm_log(warning, logmsg);
+		free(logmsg);
 
 	}
-	
+
 	machine->trans++;
 	
 }
@@ -266,12 +274,13 @@ void print_fsm_ll(fsm_ll *machine)
 	void *trans;
 	sizeofIComp  = sizeof(size_t) * 8 - machine->sizeofI;
 	sizeofOComp = ((size_t)(sizeof(size_t) * 8)) - machine->sizeofO;
+	
 	for(j = 0; j < machine->size; j++)
 	{
 		s = j >> machine->sizeofI;
 		i = (j << sizeofIComp) >> sizeofIComp;
 
-		if(linked_list_transverse(*(machine->si + j), &trans))
+		if(linked_list_transverse(machine->si[j], &trans))
 		{
 			transition = (size_t*)trans;
 			n = *transition >> machine->sizeofO;
@@ -288,6 +297,102 @@ void print_fsm_ll(fsm_ll *machine)
 		}
 	}
 }
+
+/*
+ * fsm_ll_to_fsm_arr: function that transforms an FSM using a linked list to an FSM array
+ * */
+
+fsm_arr *fsm_ll_to_fsm_arr(fsm_ll *machine)
+{
+	fsm_arr *fsm = (fsm_arr*)malloc(sizeof(fsm_arr));
+	size_t current_index;
+	size_t j, *transition, sizeofIComp, sizeofOComp;
+	void *trans;
+
+	if(!machine)
+		return NULL;
+
+	fsm->size = machine->size; 
+	fsm->indices =  (size_t*)malloc(machine->size*sizeof(size_t));
+	fsm->transitions = (size_t*)malloc(machine->trans * sizeof(size_t));
+	fsm->sizeofI = machine->sizeofI;
+	fsm->sizeofO = machine->sizeofO;
+	fsm->trans = machine->trans;
+	
+	sizeofIComp  = sizeof(size_t) * 8 - machine->sizeofI;
+	sizeofOComp = ((size_t)(sizeof(size_t) * 8)) - machine->sizeofO;
+
+	current_index = 0;
+
+	//copy each index and for each index allocate transitions
+	for (j = 0; j < machine->size; j++)
+	{
+		fsm->indices[j] = current_index;
+		if(linked_list_transverse(*(machine->si + j), &trans))
+		{
+			transition = (size_t*)trans;
+			if(current_index >= fsm->trans)
+			{
+				fsm_log(warning, "Warning! more transitions are defined than the stated number!");
+				continue;
+			}
+			fsm->transitions[current_index] = *transition;
+			current_index++;
+		}
+		while(linked_list_transverse(NULL, &trans))
+		{
+			transition = (size_t*)trans;
+			if(current_index >= fsm->trans)
+			{
+				fsm_log(warning, "Warning! more transitions are defined than the stated number!");
+				continue;
+			}
+			fsm->transitions[current_index] = *transition;
+			current_index++;
+		}
+	}
+	
+	return fsm;
+}
+
+/*
+ * delete fsm_arr: unallocates / deletes the fsm_arr machine
+ * */
+void delete_fsm_arr(fsm_arr *fsm)
+{
+	free(fsm->indices);
+	free(fsm->transitions);	
+	free(fsm);
+}
+
+
+/*
+ * print fsm_arr: prints the fsm_arr in state/input order
+ * */
+
+void print_fsm_arr(fsm_arr *fsm)
+{
+	size_t j, k, m, transition, sizeofIComp, sizeofOComp;
+	size_t i,o,s,n;
+	sizeofIComp  = sizeof(size_t) * 8 - fsm->sizeofI;
+	sizeofOComp = ((size_t)(sizeof(size_t) * 8)) - fsm->sizeofO;
+	for(j = 0; j < fsm->size; j++)
+	{
+		s = j >> fsm->sizeofI;
+		i = (j << sizeofIComp) >> sizeofIComp;
+		
+		m = (j != fsm->size - 1)? fsm->indices[j+1] : fsm->trans;
+		
+		for(k = fsm->indices[j]; k < m; k++)	
+		{
+			transition = fsm->transitions[k];
+			n = transition >> fsm->sizeofO;
+			o = (transition << sizeofOComp) >> sizeofOComp;
+			printf("(s=%llu,i=%llu,o=%llu,n=%llu)\n", s,i,o,n);
+		}
+	}
+}
+
 
 #ifdef __cplusplus
 }

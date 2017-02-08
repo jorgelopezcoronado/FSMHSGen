@@ -39,14 +39,12 @@ typedef struct fsm_arr_tag
 	size_t *indices; //array of indices
 	size_t *transitions; //array of transitions
 	size_t init;
+	size_t trans;
+	unsigned char sizeofI;
+	unsigned char sizeofO;
+
 }fsm_arr;
 #endif
-
-/*
- * fsm_ll_to_fsm_arr: function that transforms an FSM using a linked list to an FSM array
- * */
-
-fsm_arr *fsm_ll_to_fsm_arr(fsm_ll *machine);
 
 /*
  * create_fsm_ll_: initializes an fsmll data structure 
@@ -89,7 +87,24 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
  * */
 
 void print_fsm_ll(fsm_ll *machine);
- 
+
+ /*
+ * fsm_ll_to_fsm_arr: function that transforms an FSM using a linked list to an FSM array
+ * */
+
+fsm_arr *fsm_ll_to_fsm_arr(fsm_ll *machine);
+
+/*
+ * delete fsm_arr: unallocates / deletes the fsm_arr machine
+ * */
+void delete_fsm_arr(fsm_arr *fsm);
+
+/*
+ * print fsm_arr: prints the fsm_arr in state/input order
+ * */
+
+
+void print_fsm_arr(fsm_arr *fsm);
 
 #ifdef __cplusplus
 }

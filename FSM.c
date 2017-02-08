@@ -174,7 +174,7 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
 	if(!machine || !machine->si)
 	{
 		logmsg =(char*)malloc(400*sizeof(char));
-		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, empty machine\n", input, state, next_state, output) < 0)
+		if(sprintf(logmsg, "Warning, Transition(i=%llu,s=%llu,n=%llu,o=%llu) not added, empty machine\n", input, state, next_state, output) < 0)
 			fsm_log(error, logerror);
 		else 
 			fsm_log(warning, logmsg);	
@@ -187,7 +187,7 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
 	if(machine->trans >= machine->maxT)
 	{
 		logmsg =(char*)malloc(400*sizeof(char));
-		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, transition count= %llu, reached maximal transitons = %llu\n", input, state, next_state, output, machine->trans, machine->maxT ) < 0)
+		if(sprintf(logmsg, "Warning, Transition(s=%llu,i=%llu,n=%llu,o=%llu) not added, transition count= %llu, reached maximal transitons = %llu\n",  state, input, next_state, output, machine->trans, machine->maxT ) < 0)
 			fsm_log(error, logerror);
 		else 
 			fsm_log(warning, logmsg);	
@@ -197,7 +197,7 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
 	if(state >= machine->maxS)
 	{
 		logmsg =(char*)malloc(400*sizeof(char));
-		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, state %llu is bigger than max_state = %llu\n", input, state, next_state, output, state, machine->maxS ) < 0)
+		if(sprintf(logmsg, "Warning, Transition(s=%llu,i=%llu,n=%llu,o=%llu) not added, state %llu is bigger than max_state = %llu\n", state, input, next_state, output, state, machine->maxS ) < 0)
 			fsm_log(error, logerror);
 		else 
 			fsm_log(warning, logmsg);	
@@ -208,7 +208,7 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
 	{
 		logmsg =(char*)malloc(400*sizeof(char));
 	
-		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, input %llu is bigger than max_input = %llu\n", input, state, next_state, output, input, machine->maxI) < 0)
+		if(sprintf(logmsg, "Warning, Transition(s=%llu,i=%llu,n=%llu,o=%llu) not added, input %llu is bigger than max_input = %llu\n", state, input,  next_state, output, input, machine->maxI) < 0)
 			fsm_log(error, logerror);
 		else 
 			fsm_log(warning, logmsg);	
@@ -218,7 +218,7 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
 	if(output >= machine->maxO)
 	{
 		logmsg =(char*)malloc(1000*sizeof(char));
-		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, output %llu is bigger than max_output = %llu\n", input, state, next_state, output, output, machine->maxO) < 0)
+		if(sprintf(logmsg, "Warning, Transition(s=%llu,i=%llu,n=%llu,o=%llu) not added, output %llu is bigger than max_output = %llu\n", state, input, next_state, output, output, machine->maxO) < 0)
 			fsm_log(error, logerror);
 		else 
 			fsm_log(warning, logmsg);	
@@ -228,7 +228,7 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
 	if(next_state >= machine->maxS)
 	{
 		logmsg =(char*)malloc(400*sizeof(char));
-		if(sprintf(logmsg, "Warning, Transition(%llu,%llu,%llu,%llu) not added, next state %llu is bigger than max_state = %llu\n", input, state, next_state, output, next_state, machine->maxS) < 0)
+		if(sprintf(logmsg, "Warning, Transition(s=%llu,i=%llu,n=%llu,o=%llu) not added, next state %llu is bigger than max_state = %llu\n", state, input, next_state, output, next_state, machine->maxS) < 0)
 			fsm_log(error, logerror);
 		else 
 			fsm_log(warning, logmsg);	
@@ -249,7 +249,7 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
 	if(!linked_list_add(machine->si[index], transition_ptr))
 	{
 		logmsg =(char*)malloc(400*sizeof(char));
-		if(sprintf(logmsg, "Warning! unable to add transition (%llu,%llu,%llu,%llu)! \n", input, state, next_state, output) < 0)
+		if(sprintf(logmsg, "Warning! unable to add transition (s=%llu,i=%llu,n=%llu,o=%llu)! \n", state, input, next_state, output) < 0)
 			fsm_log(error, logerror);
 		else 
 			fsm_log(warning, logmsg);

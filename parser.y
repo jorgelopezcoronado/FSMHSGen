@@ -44,6 +44,7 @@ typedef void* yyscan_t;
 %token TOKEN_NUMBER
 
 %type <num> TOKEN_NUMBER 
+
 %%
 
 input
@@ -53,18 +54,22 @@ fsm
 	: header transitions 
 	;	
 header	
-	: TOKEN_FSMTYPE TOKEN_NUMBER  subheader { /*just ignore the machine type for us*/}  
+	: TOKEN_FSMTYPE TOKEN_NUMBER { /*just ignore the machine type for us*/}  
+	| TOKEN_FSMTYPE TOKEN_NUMBER  subheader { /*just ignore the machine type for us*/}  
 	;
 subheader
-	: TOKEN_STATES TOKEN_NUMBER subheader {set_maxs(*machine,$2);} 
-	| TOKEN_INPUTS TOKEN_NUMBER subheader {set_maxi(*machine,$2);} 
-	| TOKEN_OUTPUTS TOKEN_NUMBER subheader {set_maxo(*machine,$2);} 
-	| TOKEN_TRANS TOKEN_NUMBER subheader {set_maxt(*machine,$2);} 
-	| TOKEN_INITIAL TOKEN_NUMBER subheader {set_init(*machine,$2);} 
-	|
+	: properties
+	| subheader properties  
+	;
+properties
+	: TOKEN_STATES TOKEN_NUMBER {set_maxs(*machine,$2);} 
+	| TOKEN_INPUTS TOKEN_NUMBER {set_maxi(*machine,$2);} 
+	| TOKEN_OUTPUTS TOKEN_NUMBER {set_maxo(*machine,$2);} 
+	| TOKEN_TRANS TOKEN_NUMBER {set_maxt(*machine,$2);} 
+	| TOKEN_INITIAL TOKEN_NUMBER {set_init(*machine,$2);} 
 	;
 transitions 
-	: TOKEN_NUMBER TOKEN_NUMBER TOKEN_NUMBER TOKEN_NUMBER transitions {add_fsm_ll_transition(*machine, $2, $1, $4, $3);}
+	: TOKEN_NUMBER TOKEN_NUMBER TOKEN_NUMBER TOKEN_NUMBER transitions {add_fsm_ll_transition(*machine, $1, $2, $4, $3);}
 	|
 	;
 %%

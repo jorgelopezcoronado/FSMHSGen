@@ -135,11 +135,10 @@ void print_timeval(struct timeval* tval, BOOL newline_before, BOOL newline_after
 //log in accordance to paramters
 //**/
 
-
-//define log level and log type, and log name
-extern loglevel log_level;
-extern logtype log_type; 
-extern const char *log_name;
+//from header file: define log level and log type, and log name
+//extern loglevel log_level;
+//extern logtype log_type; 
+//extern const char *log_name;
 
 const char *loglevel_text(loglevel ll)
 {

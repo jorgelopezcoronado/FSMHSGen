@@ -43,7 +43,6 @@ char *textFromFile(char *filename)
 	size_t fileSize;
 	char *text;
 		
-
 	file = fopen(filename, "rb");
 	if (!file)
 	{
@@ -76,9 +75,13 @@ char *textFromFile(char *filename)
 
 }
 
+//Global variables to hold the tool configuration.
 loglevel log_level;
 logtype log_type;
 const char *log_name;
+size_t used_mem;
+size_t max_time;
+size_t max_hs_length;
 
 int main(int argc, char **argv)
 {
@@ -88,6 +91,9 @@ int main(int argc, char **argv)
 	log_level = error;
 	log_type = none;
 	log_name = "FSMHSGen.log"; 
+	used_mem = 0;
+	max_time = 0;
+	max_hs_length = 0;
 
 	if(argc < 2)
 	{

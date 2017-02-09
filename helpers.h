@@ -36,6 +36,13 @@ typedef enum
 }logtype;
 #endif
 
+#ifndef logtype
+//define log level and log type, and log name
+extern loglevel log_level;
+extern logtype log_type; 
+extern const char *log_name;
+#endif
+
 /*
  *  * timeval_substract takes two values to substract and put the result in the result parameter.
  */

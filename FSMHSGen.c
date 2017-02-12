@@ -79,9 +79,217 @@ char *textFromFile(char *filename)
 loglevel log_level;
 logtype log_type;
 const char *log_name;
-size_t used_mem;
 size_t max_time;
-size_t max_hs_length;
+size_t max_mem;
+size_t max_length;
+char *filename;	
+
+void print_help(char *progname)
+{
+	printf("Usage %s: [-h|--help|--h] [-ml max_length] [-mt max_time] [-mm max_mem] [-ll log_level] [-lt log_type] [-cf config_file] <fsm_file>\n", progname);
+	printf("\t\t-h\n\t\t\tPrints this message, the program help.\n");
+	printf("\t\t-ml max_length [default=0]\n\t\t\tThe maximal length of the homing sequence.\n\t\t\tIntepreted as a number. 0 = no limit.\n");
+	printf("\t\t-mt max_time [default=0]\n\t\t\tThe maximal time allowed to spend to obtain the homing sequences.\n\t\t\tIntepreted as a number. 0 = no limit.\n");
+	printf("\t\t-mm max_mem [default=0]\n\t\t\tThe maximal memory allowed to allocate to obtain the homing sequences.\n\t\t\tIntepreted as a number. 0 = no limit.\n");
+	printf("\t\t-ll log_level [default=3]\n\t\t\tSpecifies the verbosity on the logged output.\n\t\t\tIntepreted as a number.\n\t\t\t0 = Emergency\n\t\t\t1 = Alert\n\t\t\t2 = Critical\n\t\t\t3 = Error\n\t\t\t4 = Warning\n\t\t\t5 = Notice\n\t\t\t6 = Info\n\t\t\t7 = Debug\n");
+	printf("\t\t-lt log_type [default=local]\n\t\t\tSpecifies logging style.\n\t\t\tlocal = log to local filename \"FSMHSGen.log\"\n\t\t\tsyslog = log using standard syslog facility, local7\n");
+	printf("\t\t-cf config_file\n\t\t\tSpecifies configuration file.\n\t\t\tConfiguration will be overwritten by the values in the file, and this values will be overwritten if future flags are read.\n");
+	printf("\t\tfsm_file\n\t\t\tSpecifies FSM to analyze in the .fsm file format.\n");
+}
+
+unsigned char is_int (char *string)
+{
+	size_t i = 0;
+	while (string[i])
+		if(string[i] <= 47 || string[i++] >=58)
+			return 0;
+	return 1;
+}
+
+void parse_args(int argc, char **argv)
+{
+	size_t i = 1;
+	while(i < argc)
+	{
+		if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help") || !strcmp(argv[i], "--h"))
+		{
+			print_help(argv[0]);
+			exit(0);
+		}
+		else if(!strcmp(argv[i], "-ml"))
+		{
+			if(i != argc - 1)	
+			{
+				if(!is_int(argv[++i]))
+				{
+					char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected number after -ml option, %s is not a positive number\n", argv[i]) + 1));
+					sprintf(msg, "Error! expected number after -ml option, %s is not a positive number\n", argv[i]);
+					fsm_log(error, msg);               
+					free(msg);
+					print_help(argv[0]);
+					exit(1);
+				}
+				sscanf(argv[i],  "%llu", &max_length);
+			}
+			else
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected number after -ml option\n") + 1));
+				sprintf(msg, "Error! expected number after -ml option\n");
+				fsm_log(error, msg);               
+				free(msg);
+				print_help(argv[0]);
+				exit(1);
+			}
+		}
+		else if(!strcmp(argv[i], "-mt"))
+		{
+			if(i != argc - 1)	
+			{
+				if(!is_int(argv[++i]))
+				{
+					char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected number after -mt option, %s is not a positive number\n", argv[i]) + 1));
+					sprintf(msg, "Error! expected number after -mt option, %s is not a positive number\n", argv[i]);
+					fsm_log(error, msg);               
+					free(msg);
+					print_help(argv[0]);
+					exit(1);
+				}
+				sscanf(argv[i],  "%llu", &max_time);
+			}
+			else
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected number after -mt option\n") + 1));
+				sprintf(msg, "Error! expected number after -mt option\n");
+				fsm_log(error, msg);               
+				free(msg);
+				print_help(argv[0]);
+				exit(1);
+			}
+		}
+		else if(!strcmp(argv[i], "-mm"))
+		{
+			if(i != argc - 1)	
+			{
+				if(!is_int(argv[++i]))
+				{
+					char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected number after -mm option, %s is not a positive number\n", argv[i]) + 1));
+					sprintf(msg, "Error! expected number after -mm option, %s is not a positive number\n", argv[i]);
+					fsm_log(error, msg);               
+					free(msg);
+					print_help(argv[0]);
+					exit(1);
+				}
+				sscanf(argv[i],  "%llu", &max_mem);
+			}
+			else
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected number after -mm option\n") + 1));
+				sprintf(msg, "Error! expected number after -mm option\n");
+				fsm_log(error, msg);               
+				free(msg);
+				print_help(argv[0]);
+				exit(1);
+			}
+		}
+		else if(!strcmp(argv[i], "-ll"))
+		{
+			if(i != argc - 1)	
+			{
+				if(!is_int(argv[++i]))
+				{
+					char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected number after -ll option, %s is not a positive number\n", argv[i]) + 1));
+					sprintf(msg, "Error! expected number after -ll option, %s is not a positive number\n", argv[i]);
+					fsm_log(error, msg);               
+					free(msg);
+					print_help(argv[0]);
+					exit(1);
+				}
+				sscanf(argv[i],  "%llu", &log_level);
+				if(log_level > debug)
+				{
+					char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! log level: %s is greater than 7 (debug)\n", argv[i]) + 1));
+					sprintf(msg, "Error! log level: %s is greater than 7 (debug)\n", argv[i]);
+					fsm_log(error, msg);               
+					free(msg);
+					print_help(argv[0]);
+					exit(1);
+				}
+			}
+			else
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected number after -ll option\n") + 1));
+				sprintf(msg, "Error! expected number after -ll option\n");
+				fsm_log(error, msg);               
+				free(msg);
+				print_help(argv[0]);
+				exit(1);
+			}
+		}
+		else if(!strcmp(argv[i], "-lt"))
+		{
+			if(i != argc - 1)	
+			{
+				if(!strcmp(argv[++i], "local") && !strcmp(argv[i], "syslog"))
+				{
+					char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected value after -lt option, \"%s\" is not in (local | syslog)\n", argv[i]) + 1));
+					sprintf(msg, "Error! expected value after -lt option, \"%s\" is not in (local | syslog)\n", argv[i]);
+					fsm_log(error, msg);               
+					free(msg);
+					print_help(argv[0]);
+					exit(1);
+				}
+				log_type = (!strcmp(argv[i], "local"))?local:syslog_log;
+			}
+			else
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected string after -lt option\n") + 1));
+				sprintf(msg, "Error! expected string after -lt option\n");
+				fsm_log(error, msg);               
+				free(msg);
+				print_help(argv[0]);
+				exit(1);
+			}
+		}
+		else if(!strcmp(argv[i], "-cf"))
+		{
+			if(i != argc - 1)	
+			{
+				//call func to process the cf file	
+			}
+			else
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected string after -cf option\n") + 1));
+				sprintf(msg, "Error! expected string after -cf option\n");
+				fsm_log(error, msg);               
+				free(msg);
+				print_help(argv[0]);
+				exit(1);
+			}
+		}
+		else
+		{
+			if(i == argc - 1)
+				filename = argv[i];
+			else
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! unrecognized option: %s\n", argv[i]) + 1));
+				sprintf(msg, "Error! unrecognized option: %s\n", argv[i]);
+				fsm_log(error, msg);               
+				free(msg);
+				print_help(argv[0]);
+				exit(1);
+			}
+		}
+		i++;
+	}
+	if(!strcmp(filename, ""))
+	{
+		fsm_log(error, "Error! an FSM filename analyize is expected!\n");
+		print_help(argv[0]);
+		exit(1);
+	}
+}
+
 
 int main(int argc, char **argv)
 {
@@ -91,19 +299,14 @@ int main(int argc, char **argv)
 	log_level = error;
 	log_type = none;
 	log_name = "FSMHSGen.log"; 
-	used_mem = 0;
 	max_time = 0;
-	max_hs_length = 0;
+	max_mem = 0;
+	max_length = 0;
+	filename = "";
 
-	if(argc < 2)
-	{
-		fsm_log(error, "Error! an FSM filename analyize is expected!\n");
-		exit(1);
-	}
+	parse_args(argc, argv);
 	
-	log_type = syslog_log;	
-		
-	input = textFromFile(argv[1]);
+	input = textFromFile(filename);
 
 	if(!input)
 	{	

@@ -7,7 +7,6 @@
 
 #include "FSM.h"
 #include "integer_set.h"
-#include "linked_list.h"
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -25,7 +24,7 @@ size_t minlength_of_HSs;
 /*
  * displays to fd the homing sequences to the file descriptor, takes the max parameters as external arguments, the initial set should be an integer set with the initial states of the FSM (potentially all states) 
  * */
-void display_hs (fsm_arr *fsm, integer_set *init_states, FILE fd);
+void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd);
 
 #ifdef __cplusplus
 }

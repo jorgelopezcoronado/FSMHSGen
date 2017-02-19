@@ -126,6 +126,9 @@ void linked_list_perform_action(linked_list *ll, void (*function)(void*));
 
 //BOOL linked_list_add_unique(linked_list *ll, void *element, char (*compare)(void *, void *));
 
+//delete without freeing the elements contained
+void del_linked_list(linked_list *ll);
+
 #ifdef __cplusplus
 }
 #endif

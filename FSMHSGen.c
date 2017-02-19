@@ -1,4 +1,5 @@
-#include "FSM.h"
+
+#include "FSM_Gedanken_experiments.h"
 #include "parser.h"
 #include "lexer.h"
 
@@ -32,7 +33,7 @@ fsm_arr *getFSM (char *source)
 	yylex_destroy(scanner);
 
 	fsm = fsm_ll_to_fsm_arr(machine);
-//	delete_fsm_ll(machine);
+	delete_fsm_ll(machine);
 
 	return fsm; 
 }
@@ -290,6 +291,23 @@ void parse_args(int argc, char **argv)
 	}
 }
 
+void hs(fsm_arr *fsm)
+{
+	integer_set *initial_states = create_integer_set();
+	size_t j;
+	if(!initial_states)
+	{
+		fsm_log(error, "Error! hs: could not allocate initial states space\n");
+		exit(1);
+	}
+	
+	for (j = 0; j < fsm->maxS; j++)
+		integer_set_add(initial_states, j);
+	
+	display_hs(fsm, initial_states, stdout);
+	return;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -328,6 +346,9 @@ int main(int argc, char **argv)
 	}
 
 	print_fsm_arr(fsm);
+
+	hs(fsm);
+	
 	delete_fsm_arr(fsm);
 
 	return 0;

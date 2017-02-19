@@ -7,7 +7,7 @@
 #include "linked_list.h"
 #include "helpers.h"
 
-/*c
+/*
  * reate_linked_list: initializes a linked list object
  */
 
@@ -307,6 +307,17 @@ void delete_linked_list(linked_list *ll)
 //		aux = ll->head;
 //	}
 	free(ll);
+}
+
+//delete without freeing the elements contained
+void del_linked_list(linked_list *ll)
+{
+	if(!ll)
+		return;
+	while(ll->head)
+		linked_list_delete(ll);
+	
+	free (ll);
 }
 /*
  * linked_list_perform_action: performs the function action to each element on the list

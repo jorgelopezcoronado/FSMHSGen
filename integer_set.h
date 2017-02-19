@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-#ifndef set
+#ifndef integer_set
 typedef struct integer_set_node_tag
 {
 	size_t number;
@@ -71,10 +71,12 @@ size_t integer_set_length(integer_set *s);
 /*
  * integer_set_compare: compares the sets, returns an unsigned in as described in the constants below.
  * */
+#ifndef ADIFFB
 #define ADIFFB (unsigned char)0 
 #define AEQUALSB (unsigned char)1 
 #define ACONTAINSB (unsigned char)2 
 #define BCONTAINSA (unsigned char)3 
+#endif
 
 unsigned char integer_set_compare(integer_set *A, integer_set *B);
 

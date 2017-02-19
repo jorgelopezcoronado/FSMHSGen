@@ -321,6 +321,7 @@ fsm_arr *fsm_ll_to_fsm_arr(fsm_ll *machine)
 	fsm->sizeofO = machine->sizeofO;
 	fsm->maxO= machine->maxO;
 	fsm->maxI = machine->maxI;
+	fsm->maxS = machine->maxS;
 	fsm->trans = machine->trans;
 	
 	sizeofIComp  = sizeof(size_t) * 8 - machine->sizeofI;
@@ -380,6 +381,14 @@ void print_fsm_arr(fsm_arr *fsm)
 	size_t i,o,s,n;
 	sizeofIComp  = sizeof(size_t) * 8 - fsm->sizeofI;
 	sizeofOComp = ((size_t)(sizeof(size_t) * 8)) - fsm->sizeofO;
+	printf("FSM\nMaxS = %llu\tMaxI = %llu\tSize = %llu\tTrans = %llu\nArrays:\nIndices:", fsm->maxS, fsm->maxI, fsm->size, fsm->trans);
+	for(j = 0; j < fsm->size; j++)
+		printf("[%llu] = %llu ", j, fsm->indices[j]);
+	printf("\nTransitions:");
+	for(j = 0; j < fsm->trans; j++)
+		printf("[%llu] = %llu ", j, fsm->transitions[j]);
+	printf("\nTuple Representation:\n");
+
 	for(j = 0; j < fsm->size; j++)
 	{
 		s = j >> fsm->sizeofI;

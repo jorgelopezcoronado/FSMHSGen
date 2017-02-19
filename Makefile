@@ -17,6 +17,7 @@ c: parser $(PARSER) $(MAIN).c $(STRUCTS)
 	gcc $(FLAGS) -c linked_list.c
 	gcc $(FLAGS) -c FSM.c
 	gcc $(FLAGS) -c integer_set.c
+	gcc $(FLAGS) -c FSM_Gedanken_experiments.c
 	gcc $(FLAGS) -o $(MAIN) *.o $(PARSER) $(MAIN).c
 
 clean: 

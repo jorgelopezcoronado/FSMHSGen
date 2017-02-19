@@ -42,7 +42,8 @@ typedef struct fsm_arr_tag
 	size_t trans;
 	unsigned char sizeofI;
 	unsigned char sizeofO;
-
+	size_t maxI;
+	size_t maxO;
 }fsm_arr;
 #endif
 

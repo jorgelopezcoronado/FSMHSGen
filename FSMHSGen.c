@@ -306,6 +306,9 @@ int main(int argc, char **argv)
 
 	parse_args(argc, argv);
 	
+//	if(log_type == none)
+//		log_type = local;
+
 	input = textFromFile(filename);
 
 	if(!input)
@@ -326,6 +329,6 @@ int main(int argc, char **argv)
 
 	print_fsm_arr(fsm);
 	delete_fsm_arr(fsm);
-	
+
 	return 0;
 }

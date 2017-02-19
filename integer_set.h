@@ -62,6 +62,22 @@ BOOL integer_set_equals (integer_set *s1, integer_set *s2);
 
 void print_integer_set(integer_set *s);
 
+/*
+ * length of an integer set
+ * */
+
+size_t integer_set_length(integer_set *s);
+
+/*
+ * integer_set_compare: compares the sets, returns an unsigned in as described in the constants below.
+ * */
+#define ADIFFB (unsigned char)0 
+#define AEQUALSB (unsigned char)1 
+#define ACONTAINSB (unsigned char)2 
+#define BCONTAINSA (unsigned char)3 
+
+unsigned char integer_set_compare(integer_set *A, integer_set *B);
+
 #ifdef __cplusplus
 }
 #endif

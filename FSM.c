@@ -91,9 +91,9 @@ void set_maxs(fsm_ll *machine, size_t states)
 		return;
 	}
 	machine->maxS = states;
-	machine->size = machine->maxS * machine->maxI;
-	if(machine->size)
+	if(machine->maxS * machine->maxI)
 	{
+		machine->size = 1 + (((machine->maxS - 1) << machine->sizeofI) | (machine->maxI - 1));//+1 since 0 needs to be also stored
 		if(machine->si)
 			free(machine->si);
 		machine->si = (linked_list**)malloc(machine->size * sizeof(linked_list*));
@@ -116,9 +116,11 @@ void set_maxi(fsm_ll *machine, size_t inputs)
 		return;
 	}
 	machine->maxI = inputs;
-	machine->size = machine->maxS * machine->maxI;
-	if(machine->size)
+	machine->sizeofI = lg2(inputs);
+
+	if(machine->maxS * machine->maxI)
 	{
+		machine->size = 1 + (((machine->maxS - 1) << machine->sizeofI) | (machine->maxI - 1));//+1 since 0 needs to be also stored
 		if(machine->si)
 			free(machine->si);
 		machine->si = (linked_list**)malloc(machine->size * sizeof(linked_list*));
@@ -132,7 +134,6 @@ void set_maxi(fsm_ll *machine, size_t inputs)
 			
 	}
 	
-	machine->sizeofI = lg2(inputs);
 }
 
 void set_maxo(fsm_ll *machine, size_t outputs)
@@ -245,6 +246,7 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
 	if (!machine->si[index])
 		machine->si[index] = create_linked_list(); 	
 	
+	//printf("m size=%llu maxs=%llu maxi=%llu\n", machine->size, machine->maxS, machine->maxI);
 	
 	if(!linked_list_add(machine->si[index], transition_ptr))
 	{
@@ -317,6 +319,8 @@ fsm_arr *fsm_ll_to_fsm_arr(fsm_ll *machine)
 	fsm->transitions = (size_t*)malloc(machine->trans * sizeof(size_t));
 	fsm->sizeofI = machine->sizeofI;
 	fsm->sizeofO = machine->sizeofO;
+	fsm->maxO= machine->maxO;
+	fsm->maxI = machine->maxI;
 	fsm->trans = machine->trans;
 	
 	sizeofIComp  = sizeof(size_t) * 8 - machine->sizeofI;

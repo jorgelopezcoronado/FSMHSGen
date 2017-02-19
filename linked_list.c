@@ -321,3 +321,20 @@ void linked_list_perform_action(linked_list *ll, void (*function)(void*))
 	}
 	
 }
+
+/*
+ * linked_list_add_unique: adds an elemet if it does not exist, it receives a comparator function to compater elements inside the list
+ * Compare must return 0 on equals*/
+
+BOOL linked_list_add_unique(linked_list *ll, void *element, char (*compare)(void *, void *))
+{
+	linked_list_node *aux = ll->head;
+	while(aux)
+	{
+		if(!compare(aux->element, element))
+			return TRUE;
+		aux = aux->next;
+	}
+	return linked_list_add(ll, element);
+	
+}

@@ -109,6 +109,7 @@ void *linked_list_get_nth(linked_list *ll, unsigned int n)
 /*
  * linked_list_transverse: function useful to get all elements of the list whithot doing too much lopps or knowing about internal structure
  */
+//horrible typo in the name, I know, I'm lazy to correct it
 
 BOOL linked_list_transverse (linked_list *ll, void **result)
 {

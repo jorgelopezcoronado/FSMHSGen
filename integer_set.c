@@ -299,10 +299,30 @@ unsigned char integer_set_compare(integer_set *A, integer_set *B)
 		return BCONTAINSA; 
 }
 
+
+/*
+ * traverse: traverses the integer_set, returns null when set is traversed
+ * */
+
+size_t *integer_set_traverse(integer_set *set)
+{
+	static integer_set_node *curr = NULL;
+	
+	curr = (set)?set->head:((curr)?curr->next:NULL);
+
+	if (curr)
+		return &curr->number;
+	return NULL;
+}
+
 /*
 
 void test_integer_set()
 {
+	
+	unsigned char i;
+	size_t *element;
+
 	integer_set *s1 = create_integer_set();
 	integer_set *s2 = NULL;
 	integer_set_add(s1, 10);
@@ -360,9 +380,29 @@ void test_integer_set()
 	printf("sets equal? %u\n",integer_set_equals(s2,s1));
 	printf("compare sets result:%u\n", integer_set_compare(s2,s1));
 
-
-
 	printf("size of s1=%llu, of s2=%llu\n", integer_set_length(s1), integer_set_length(s2));
+	
+	element = integer_set_traverse(s2);
+	printf("s2 element %d\n", (element)?*element:-1);
+
+	for(i=0; i< 7; i++)
+	{
+		element = integer_set_traverse(NULL);
+		printf("s2 element %d\n", (element)?*element:-1);
+	}
+	
+	element = integer_set_traverse(s1);
+	printf("s1 element %d\n", (element)?*element:-1);
+
+	for(i=0; i< 7; i++)
+	{
+		element = integer_set_traverse(NULL);
+		printf("s1 element %d\n", (element)?*element:-1);
+	}
+
+	element = integer_set_traverse(s1);
+	printf("s1 element %d\n", (element)?*element:-1);
+
 }
 
 int main()

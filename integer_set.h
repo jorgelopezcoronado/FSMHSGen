@@ -78,6 +78,12 @@ size_t integer_set_length(integer_set *s);
 
 unsigned char integer_set_compare(integer_set *A, integer_set *B);
 
+/*
+ * traverse: traverses the integer_set, returns null when set is traversed
+ * */
+
+size_t *integer_set_traverse(integer_set *set);
+
 #ifdef __cplusplus
 }
 #endif

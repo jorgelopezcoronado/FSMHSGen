@@ -301,7 +301,8 @@ void hs(fsm_arr *fsm)
 		exit(1);
 	}
 	
-	for (j = 0; j < fsm->maxS; j++)
+	//for (j = 0; j < fsm->maxS; j++)
+	for (j = 0; j < 4; j++)
 		integer_set_add(initial_states, j);
 	
 	display_hs(fsm, initial_states, stdout);
@@ -345,7 +346,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	print_fsm_arr(fsm);
+	//print_fsm_arr(fsm);
 
 	hs(fsm);
 	

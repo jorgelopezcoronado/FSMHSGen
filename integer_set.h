@@ -86,6 +86,12 @@ unsigned char integer_set_compare(integer_set *A, integer_set *B);
 
 size_t *integer_set_traverse(integer_set *set);
 
+/*
+ * delete_integer_set: deletes the integer set releasing all pointers and values
+ * */
+
+void delete_integer_set (integer_set *set);
+
 #ifdef __cplusplus
 }
 #endif

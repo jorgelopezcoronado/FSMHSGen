@@ -259,6 +259,76 @@ unsigned char* defined_inputs(fsm_arr *fsm, linked_list *state_subsets)
 	
 }
 
+/*
+ * del_subset_from_node: remove subsets in node, auxiliary function applied after i-successor to remove proper subsets of it
+ * */
+void del_subsets_from_node(linked_list **node)
+{
+	linked_list *ll = NULL;
+	linked_list_node *subset_node = NULL, *subset_nodeaux = NULL, *subset_prev = NULL, *subset_prevaux;
+	
+	if(!node)
+		return;
+
+	ll = *node;
+
+	if(!ll)
+		return;
+	subset_node = ll->head;
+	subset_prev = ll->head;
+	
+	while(subset_node)
+	{
+		unsigned char head_deleted = 0;
+		integer_set *A = (integer_set*)subset_node->element;
+		subset_prevaux = subset_node;
+		subset_nodeaux = subset_node->next;
+		while(subset_nodeaux)
+		{
+			unsigned char compare;
+			integer_set *B = (integer_set*)subset_nodeaux->element;
+			compare = integer_set_compare(A, B);
+			if(compare == AEQUALSB || compare == ACONTAINSB)//delete b, simple
+			{
+				subset_prevaux->next = subset_nodeaux->next; //
+				subset_nodeaux->next = NULL;
+				subset_nodeaux->element = NULL;
+				delete_integer_set(B);
+				free(subset_nodeaux);
+				subset_nodeaux = subset_prevaux->next;
+			}
+			else if(compare == BCONTAINSA)//delete a
+			{
+				if(subset_node == ll->head) //take head into consideration and move head
+				{	
+					ll->head = ll->head->next;
+					subset_prev = ll->head;					
+					head_deleted = 1;
+				}
+				else
+					subset_prev->next = subset_node->next;
+				subset_node->next = NULL;
+				subset_node->element = NULL;
+				delete_integer_set(A);
+				free(subset_node);
+				subset_node = subset_prev;
+				break;
+			}
+			else //delete nothing
+			{
+				subset_prevaux = subset_prevaux->next;
+				subset_nodeaux = subset_nodeaux->next;
+			}
+		}
+		if(!head_deleted)
+		{
+			subset_prev = subset_node;
+			subset_node = subset_node->next;
+		}
+	}
+	
+}
+
 //current usage variables
 clock_t initial_time;
 size_t used_mem = 0;
@@ -322,6 +392,7 @@ void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 {
 	integer_set_node *aux = NULL;
 	linked_list *ll = NULL, *isucc = NULL; 
+	integer_set *test_set = NULL;
 
 	unsigned char *defined_i = NULL;
 	size_t i;
@@ -347,7 +418,19 @@ void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 	
 		
 	ll = create_linked_list();
-	linked_list_add(ll, init_states);
+//	linked_list_add(ll, init_states);
+
+	test_set = create_integer_set();
+	integer_set_add(test_set, 0);
+	integer_set_add(test_set, 1);
+	integer_set_add(test_set, 2);
+	linked_list_add(ll, test_set);
+
+	test_set = create_integer_set();
+	integer_set_add(test_set, 2);
+	integer_set_add(test_set, 3);
+	linked_list_add(ll, test_set);
+
 
 	separator = '.'; //very ascii, very common separator
 	initial_time = clock();
@@ -358,11 +441,27 @@ void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 	used_mem = (fsm->size + fsm->trans) * sizeof(size_t);
 	//call the hs process
 	print_node(ll);
+	printf("\n\n\n");
 
-	isucc = i_successor(fsm, ll, 0);
+	isucc = i_successor(fsm, ll, 1);
+	
+	test_set = create_integer_set();
+	integer_set_add(test_set, 13);
+	integer_set_add(test_set, 19);
+	linked_list_add(isucc, test_set);
+	test_set = create_integer_set();
+	integer_set_add(test_set, 13);
+	integer_set_add(test_set, 19);
+	linked_list_add(isucc, test_set);
+
 	
 	print_node(isucc);
 
+	printf("\n\n\n");
+
+	del_subsets_from_node(&isucc);
+
+	print_node(isucc);
 
 }
 

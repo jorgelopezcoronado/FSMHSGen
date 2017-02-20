@@ -316,7 +316,27 @@ size_t *integer_set_traverse(integer_set *set)
 }
 
 /*
+ * delete_integer_set: deletes the integer set releasing all pointers and values
+ * */
 
+void delete_integer_set (integer_set *set)
+{
+	integer_set_node *aux = NULL, *aux2 = NULL;
+	if(!set)
+		return;
+	aux = set->head;
+	while(aux)
+	{
+		aux2 = aux;	
+		aux = aux->next;
+		aux2->next = NULL;
+		free(aux2);
+	}
+
+	free(set);
+}
+
+/*
 void test_integer_set()
 {
 	
@@ -402,6 +422,9 @@ void test_integer_set()
 
 	element = integer_set_traverse(s1);
 	printf("s1 element %d\n", (element)?*element:-1);
+
+	delete_integer_set(s1);
+	delete_integer_set(s2);
 
 }
 

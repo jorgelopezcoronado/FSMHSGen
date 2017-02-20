@@ -272,6 +272,7 @@ void del_subsets_from_node(linked_list **node)
 
 	ll = *node;
 
+
 	if(!ll)
 		return;
 	subset_node = ll->head;
@@ -334,55 +335,144 @@ clock_t initial_time;
 size_t used_mem = 0;
 size_t HS_counter = 0;
 
-///state_subsets is a ll which contains integer sets represetning the subsets of states
-void display_hs_preset_derivation(fsm_arr *fsm, linked_list *state_subsets, char *prefix, FILE *fd, size_t level)
+#ifndef TST_node
+typedef struct TST_node_tag
 {
-	//check for HS rules
-	size_t spent_time = (clock() - initial_time) / CLOCKS_PER_SEC;
-	if(state_subsets_are_singletons(state_subsets)) //Found a HS
-	{	
-		char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing Sequence Found: %s\n", prefix) + 1));
-		sprintf(msg, "Homing Sequence Found: %s\n", prefix);
-		fsm_log(info, msg);
-		free(msg);
-		fprintf(fd, "%s", prefix);
-		minlength_of_HSs = (minlength_of_HSs > level || !minlength_of_HSs)?level:minlength_of_HSs; 
+	char *sequence;
+	linked_list *sss; //state subset set
+}TST_node;
+#endif
+
+///state_subsets is a ll which contains integer sets represetning the subsets of states
+void display_hs_preset_derivation(fsm_arr *fsm, linked_list *initial_level, FILE *fd)
+{
+	size_t level = 0, i;
+	linked_list *current_level = NULL, *next_level = NULL, *sss = NULL, *isucc = NULL;
+	linked_list_node *level_node = NULL, *ss_node = NULL, *ss_nodeaux = NULL;
+	TST_node *node = NULL, *isucc_node = NULL;
+	char *sequence = NULL, *inputs;
+	
+	if(!fsm || !initial_level)
 		return;
-	}
-
-	if(max_length && level >= max_length) //default truncating rule for the tree, in exception of max_level being 0
-	{
-		char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Reached Max depth = %llu with sequence %s\n", level,  prefix) + 1));
-		sprintf(msg, "Reached Max depth = %llu with sequence %s\n", level,  prefix);
-		fsm_log(info, msg);
-		free(msg);
-		return;
-	}
 	
-	if(max_time && spent_time >= max_time) //we finish inmediatelly, sorry :) 
-	{
-		char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing sequence time expired: current time= %llu, max time = %llu\n", spent_time, max_time) + 1));
-		sprintf(msg, "Homing sequence time expired: current time= %llu, max time = %llu\n", spent_time, max_time);
-		fsm_log(info, msg);
-		free(msg);
-
-		//metric on HS length print LHSM = minlength_of_HSs depending on certain flag	
+	current_level = initial_level;
 	
-		exit(0);//normal exit, time expired but forseen
+	while(linked_list_size(current_level))
+	{
+		level_node = current_level->head;
+		next_level = create_linked_list();
+		while(level_node)
+		{
+			node = (TST_node*)level_node->element;
+			
+			if(!node)
+			{
+				
+				fsm_log(warning, "Warning! node is not a TST node\n");
+				level_node = level_node->next;
+				continue;
+			}
+
+			sss = node->sss;
+			sequence = node->sequence;
+	
+			//check for HS rules
+			size_t spent_time = (clock() - initial_time) / CLOCKS_PER_SEC;
+			if(state_subsets_are_singletons(sss)) //Found a HS
+			{	
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing Sequence Found: %s\n", sequence) + 1));
+				sprintf(msg, "Homing Sequence Found: %s\n", sequence);
+				fsm_log(info, msg);
+				free(msg);
+				fprintf(fd, "HS: %s\n", sequence);
+				minlength_of_HSs = (minlength_of_HSs > level || !minlength_of_HSs)?level:minlength_of_HSs; 
+				HS_counter++;
+			}
+
+			if(max_length && level >= max_length) //default truncating rule for the tree, in exception of max_level being 0
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Reached Max depth = %llu with sequence %s\n", level, sequence) + 1));
+				sprintf(msg, "Reached Max depth = %llu with sequence %s\n", level,  sequence);
+				fsm_log(info, msg);
+				free(msg);
+				return;
+			}
+	
+			if(max_time && spent_time >= max_time) //we finish inmediatelly, sorry :) 
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing sequence time expired: current time= %llu, max time = %llu\n", spent_time, max_time) + 1));
+				sprintf(msg, "Homing sequence time expired: current time= %llu, max time = %llu\n", spent_time, max_time);
+				fsm_log(info, msg);
+				free(msg);
+
+				//metric on HS length print LHSM = minlength_of_HSs depending on certain flag	
+	
+				exit(0);//normal exit, time expired but forseen
+			}
+
+			if(max_mem && used_mem >= max_mem) //we finish inmediatelly, sorry :) 
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing sequence memory limit reached: current usage= %llu, max mem = %llu\n", used_mem, max_mem) + 1));
+				sprintf(msg, "Homing sequence memory limit reached: current usage= %llu, max mem = %llu\n", used_mem, max_mem);
+				fsm_log(info, msg);
+				free(msg);
+
+				//metric on HS length print LHSM = minlength_of_HSs depending on certain flag	
+	
+				exit(0);//normal exit, time expired but forseen
+			}
+
+			//in here, we continue, i.e., we derive the next level based on the i-succ of nodes
+
+			inputs = defined_inputs(fsm, sss); 
+			for(i = 0; i < fsm->maxI; i++)
+			{	
+				if(!inputs[i])//not defined input for the node 
+					continue;
+				isucc = i_successor(fsm, sss, i);
+				if(isucc)
+				{
+					char *seq = NULL;
+					del_subsets_from_node(&isucc);
+					if(*sequence)//sequence is not empty
+					{
+						seq = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "%s%c%llu", sequence, separator,  i) + 1)); 
+						sprintf(seq, "%s%c%llu", sequence, separator,  i);
+					}
+					else
+					{
+						seq = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "%llu", i) + 1)); 
+						sprintf(seq, "%llu", i);
+					}
+		
+					isucc_node = (TST_node*)malloc(sizeof(TST_node));
+					isucc_node->sequence = seq;
+					isucc_node->sss = isucc;
+					linked_list_add(next_level, isucc_node);
+				}
+			}	
+	
+			free(inputs);
+
+			//delete current node (already analyzed and we are not checking shortest squences)
+			//delete sequence, easy :)
+			free(node->sequence);
+			//delete sss... a bit more complex	
+			ss_node = node->sss->head;
+			while(ss_node)
+			{
+				delete_integer_set((integer_set*)ss_node->element);
+				ss_node = ss_node->next;
+			}
+			//finally, delete the node itself
+			del_linked_list(node->sss);
+			
+			level_node = level_node->next;
+		}
+		level++;
+		del_linked_list(current_level);
+		current_level = next_level;
 	}
-
-	if(max_mem && used_mem >= max_mem) //we finish inmediatelly, sorry :) 
-	{
-		char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing sequence memory limit reached: current usage= %llu, max mem = %llu\n", used_mem, max_mem) + 1));
-		sprintf(msg, "Homing sequence memory limit reached: current usage= %llu, max mem = %llu\n", used_mem, max_mem);
-		fsm_log(info, msg);
-		free(msg);
-
-		//metric on HS length print LHSM = minlength_of_HSs depending on certain flag	
-	
-		exit(0);//normal exit, time expired but forseen
-	}	
-
 }
 
 /*
@@ -391,8 +481,10 @@ void display_hs_preset_derivation(fsm_arr *fsm, linked_list *state_subsets, char
 void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 {
 	integer_set_node *aux = NULL;
-	linked_list *ll = NULL, *isucc = NULL; 
+	linked_list *init_node = NULL, *init_level= NULL; 
 	integer_set *test_set = NULL;
+	TST_node *initial_node = NULL;
+	char *prefix = NULL;
 
 	unsigned char *defined_i = NULL;
 	size_t i;
@@ -417,20 +509,16 @@ void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 
 	
 		
-	ll = create_linked_list();
-//	linked_list_add(ll, init_states);
-
-	test_set = create_integer_set();
-	integer_set_add(test_set, 0);
-	integer_set_add(test_set, 1);
-	integer_set_add(test_set, 2);
-	linked_list_add(ll, test_set);
-
-	test_set = create_integer_set();
-	integer_set_add(test_set, 2);
-	integer_set_add(test_set, 3);
-	linked_list_add(ll, test_set);
-
+	init_node = create_linked_list();
+	linked_list_add(init_node, init_states);
+	prefix = (char*)malloc(1);
+	*prefix = 0; //empty string
+	initial_node = (TST_node*)malloc(sizeof(TST_node));
+	initial_node->sequence = prefix;
+	initial_node->sss = init_node;
+	
+	init_level = create_linked_list();
+	linked_list_add(init_level, initial_node);
 
 	separator = '.'; //very ascii, very common separator
 	initial_time = clock();
@@ -440,29 +528,7 @@ void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 	//calculate the size of the fsm
 	used_mem = (fsm->size + fsm->trans) * sizeof(size_t);
 	//call the hs process
-	print_node(ll);
-	printf("\n\n\n");
-
-	isucc = i_successor(fsm, ll, 1);
-	
-	test_set = create_integer_set();
-	integer_set_add(test_set, 13);
-	integer_set_add(test_set, 19);
-	linked_list_add(isucc, test_set);
-	test_set = create_integer_set();
-	integer_set_add(test_set, 13);
-	integer_set_add(test_set, 19);
-	linked_list_add(isucc, test_set);
-
-	
-	print_node(isucc);
-
-	printf("\n\n\n");
-
-	del_subsets_from_node(&isucc);
-
-	print_node(isucc);
-
+	display_hs_preset_derivation(fsm, init_level, fd);
 }
 
 #ifdef __cplusplus

@@ -1,16 +1,17 @@
 MAIN=FSMHSGen
-#MAIN=FSMTest
-STRUCTS=helpers.c helpers.h linked_list_node.h linked_list.c linked_list.h  FSM.c FSM.h integer_set.h integer_set.c 
-PARSER=lexer.c parser.c
+STRUCTS=helpers.c helpers.h linked_list_node.h linked_list.c linked_list.h  FSM.c FSM.h integer_set.h integer_set.c FSM_Gedanken_experiments.c FSM_Gedanken_experiments.h 
+PARSER=lexer.c parser.c fpl.c fpp.c
 FLAGS=-g -std=gnu89 
 
 all: c
 
-lexer: lexer.l $(STRUCTS)
+lexer: lexer.l fp.l $(STRUCTS)
 	lex lexer.l
+	lex fp.l
 
-parser: lexer parser.y lexer.c $(STRUCTS)
+parser: lexer parser.y lexer.c fpl.c fp.y $(STRUCTS)
 	bison parser.y
+	bison fp.y
 
 c: parser $(PARSER) $(MAIN).c $(STRUCTS) 
 	gcc $(FLAGS)-c helpers.c
@@ -21,6 +22,6 @@ c: parser $(PARSER) $(MAIN).c $(STRUCTS)
 	gcc $(FLAGS) -o $(MAIN) *.o $(PARSER) $(MAIN).c
 
 clean: 
-	rm -rf lexer.c lexer.h parser.c parser.h *.gch *.o $(MAIN)
+	rm -rf fpl.h fpl.c fpp.h fpp.c lexer.c lexer.h parser.c parser.h *.gch *.o $(MAIN)
 
 redo: clean c

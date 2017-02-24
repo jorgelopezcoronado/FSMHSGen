@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "integer_set.h"
 
@@ -185,37 +186,69 @@ BOOL integer_set_equals (integer_set *s1, integer_set *s2)
 }
 
 /*
- *print the set
+ *integer_set_to_string(): returns the string represetnation of the integer set
  * */
 
-void print_integer_set(integer_set *s)
+char *integer_set_to_string (integer_set *set)
 {
 	integer_set_node *aux = NULL; 
+	char *string_rep  = NULL, *string_temp = NULL;
 
-	if(s == NULL)
+	if(set == NULL)
 	{
-		printf("NaIS\n"); //Not a set
-		return;
+		string_rep = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "NaIS") + 1));
+		sprintf(string_rep, "NaIS");
+		return string_rep;
 	}
 
-	aux = s->head;
+	aux = set->head;
 
-	printf("{");
+	string_rep = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "{") + 1));
+	sprintf(string_rep, "{");
 
 	if(aux)
 	{
-		printf("%llu", aux->number);
+		string_temp = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "%s", string_rep) + 1 ));
+		sprintf(string_temp, "%s", string_rep);
+		free(string_rep);
+		string_rep = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "%s%llu", string_temp, aux->number) + 1));
+		sprintf(string_rep, "%s%llu", string_temp,  aux->number);
+
+		free(string_temp);
 		aux = aux->next;
 	}
 	
 	while(aux)
 	{
-		printf(", %llu", aux->number);
+		string_temp = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "%s", string_rep) + 1 ));
+		sprintf(string_temp, "%s", string_rep);
+		free(string_rep);
+		string_rep = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "%s, %llu", string_temp, aux->number) + 1));
+
+		sprintf(string_rep, "%s, %llu", string_temp,  aux->number);
+		free(string_temp);
 		aux = aux->next;
 	}
-	
-	printf("}\n");
-	
+	string_temp = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "%s", string_rep) + 1 ));
+	sprintf(string_temp, "%s", string_rep);
+	free(string_rep);
+	string_rep = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "%s}", string_temp) + 1));
+	sprintf(string_rep, "%s}", string_temp);
+	free(string_temp);
+
+		
+	return string_rep; 
+}
+
+/*
+ *print the set
+ * */
+
+void print_integer_set(integer_set *s)
+{
+	char *str_rep = integer_set_to_string(s);
+	printf("%s\n", str_rep);
+	free(str_rep);
 }
 
 /*

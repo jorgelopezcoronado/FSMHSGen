@@ -485,6 +485,7 @@ void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 	integer_set *test_set = NULL;
 	TST_node *initial_node = NULL;
 	char *prefix = NULL;
+	integer_set *initial_states = NULL;
 
 	unsigned char *defined_i = NULL;
 	size_t i;
@@ -506,11 +507,11 @@ void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 		}
 		aux = aux->next;
 	}
-
 	
+	initial_states = integer_set_clone(init_states);
 		
 	init_node = create_linked_list();
-	linked_list_add(init_node, init_states);
+	linked_list_add(init_node, initial_states);
 	prefix = (char*)malloc(1);
 	*prefix = 0; //empty string
 	initial_node = (TST_node*)malloc(sizeof(TST_node));
@@ -529,6 +530,17 @@ void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 	used_mem = (fsm->size + fsm->trans) * sizeof(size_t);
 	//call the hs process
 	display_hs_preset_derivation(fsm, init_level, fd);
+	
+	if (HS_counter == 0);
+	{
+		char *str_is = integer_set_to_string(init_states);
+		char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "There is no homing sequence (using the current parameters parameters for the initial state subset %s\n", str_is ) + 1));
+		sprintf(msg, "There is no homing sequence (using the current parameters parameters for the initial state subset %s\n", str_is);
+		printf("%s", msg);
+		fsm_log(info, msg);
+		free(str_is);	
+		free(msg);
+	}
 }
 
 #ifdef __cplusplus

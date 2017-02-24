@@ -107,6 +107,30 @@ unsigned char is_int (char *string)
 	return 1;
 }
 
+/*quick and dirty implementation*/
+void parse_file(char *filename)
+{
+	void parse_args(int argc, char**argv);
+	char **arguments = NULL;
+	char *text = NULL, text_ptr;
+	int size = 0;
+	size_t text_index = 0;
+
+	text = textFromFile(filename);
+	
+	if(!text)
+		return;
+
+	text_ptr = text;
+
+	while(*)
+
+	parse_args(size, arguments);
+		
+	free(text);
+	
+}
+
 void parse_args(int argc, char **argv)
 {
 	size_t i = 1;

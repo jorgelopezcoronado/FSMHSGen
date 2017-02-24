@@ -63,6 +63,12 @@ BOOL integer_set_equals (integer_set *s1, integer_set *s2);
 void print_integer_set(integer_set *s);
 
 /*
+ *integer_set_to_string(): returns the string represetnation of the integer set
+ * */
+
+char *integer_set_to_string (integer_set *set);
+
+/*
  * length of an integer set
  * */
 

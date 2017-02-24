@@ -4,9 +4,9 @@
 #include "parser.h"
 #include "lexer.h"
 
-int yyerror(fsm_ll **machine, yyscan_t scanner, const char *msg) 
+int fsmerror(fsm_ll **machine, yyscan_t scanner, const char *msg) 
 {
-	printf("Unrecognized structure, message: %s\n", msg);
+	printf("FSM file Unrecognized structure, message: %s\n", msg);
 }
 
 %}
@@ -25,6 +25,8 @@ typedef void* yyscan_t;
 %defines "parser.h"
 
 %define api.pure
+%error-verbose 
+%name-prefix "fsm" 
 %lex-param   { yyscan_t scanner }
 %parse-param { fsm_ll **machine }
 %parse-param { yyscan_t scanner }

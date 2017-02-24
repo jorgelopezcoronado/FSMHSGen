@@ -6,6 +6,7 @@
 %}
 
 %option outfile="lexer.c" header-file="lexer.h"
+%option prefix="fsm"
 %option warn nodefault
 
 %option reentrant noyywrap never-interactive nounistd

@@ -6,6 +6,7 @@
 %}
 
 %option outfile="fpl.c" header-file="fpl.h"
+%option prefix="fp"
 %option warn nodefault
 
 %option reentrant noyywrap never-interactive nounistd
@@ -15,7 +16,7 @@
 EQ "="
 MM "MaxMemSize"
 MT "MaxTime"
-ML "MaxLength"
+ML "MaxHSLength"
 LT "LogType"
 LL "LogLevel"
 SL "syslog"
@@ -43,15 +44,15 @@ COMMENT	#[^\n]*
 {ML} {return TOKEN_ML;}
 {LT} {return TOKEN_LT;}
 {LL} {return TOKEN_LL;}
-{SL} {return TOKEN_LL;}
-{LC} {return TOKEN_LL;}
+{SL} {return TOKEN_SL;}
+{LC} {return TOKEN_LC;}
 {TR} {return TOKEN_TR;}
 {FL} {return TOKEN_FL;}
 {PM} {return TOKEN_PM;}
 {NM} {return TOKEN_NM;}
 {OM} {return TOKEN_OM;}
 {LM} {return TOKEN_LM;}
-{INTEGER} {sscanf(yytext, "%s", &yylval->num); return TOKEN_NUMBER;}
+{INTEGER} {sscanf(yytext, "%s", yylval->str); return TOKEN_NUMBER;}
 
 . { printf("Warning! Unrecognized token: %s\n", yytext); } 
 

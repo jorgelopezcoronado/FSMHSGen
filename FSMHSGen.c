@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-int yyparse (fsm_ll **machine, yyscan_t scan);
+//int yyparse (fsm_ll **machine, yyscan_t scan);
 
 fsm_arr *getFSM (char *source)
 {
@@ -15,22 +15,25 @@ fsm_arr *getFSM (char *source)
 	yyscan_t scanner;
 	YY_BUFFER_STATE state;
 
-	if (yylex_init(&scanner)) 
+	YY_BUFFER_STATE fsm_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+	int fsmparse (fsm_ll **machine, yyscan_t scan);
+
+	if (fsmlex_init(&scanner)) 
 	{
 		//couldn't initialize
 		return NULL;
 	}
 
 
-	state = yy_scan_string(source, scanner); //tokenize source_code
-	if (yyparse(&machine, scanner)) //retreive the AST from parser using tokenize string
+	state = fsm_scan_string(source, scanner); //tokenize source_code
+	if (fsmparse(&machine, scanner)) //retreive the AST from parser using tokenize string
 	{
 		//error parsing not your issue
 		return NULL;
 	}
         
-	yy_delete_buffer(state, scanner);
-	yylex_destroy(scanner);
+	fsm_delete_buffer(state, scanner);
+	fsmlex_destroy(scanner);
 
 	fsm = fsm_ll_to_fsm_arr(machine);
 	delete_fsm_ll(machine);
@@ -69,6 +72,7 @@ char *textFromFile(char *filename)
 		free(text);
 		return NULL;
 	}
+	text[fileSize] = 0;
 
 	fclose(file);
 	
@@ -107,31 +111,67 @@ unsigned char is_int (char *string)
 	return 1;
 }
 
-/*quick and dirty implementation*/
-void parse_file(char *filename)
+/* make use of parse_args function */ 
+void parse_file(char *progname, char *filename)
 {
-	void parse_args(int argc, char**argv);
 	char **arguments = NULL;
-	char *text = NULL, text_ptr;
-	int size = 0;
-	size_t text_index = 0;
+	char *text = NULL;
+	int size = 0, i = 0;
+	linked_list *result = NULL;
+	yyscan_t scan;
+	YY_BUFFER_STATE st;
+
+	void parse_args(unsigned char file_req, int argc, char**argv);
+	YY_BUFFER_STATE fp_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
 
 	text = textFromFile(filename);
 	
 	if(!text)
 		return;
 
-	text_ptr = text;
+	result = create_linked_list(); 
+	
+	if(!result)	
+	{
+		fsm_log(error, "Error! could not allocate memory for paramter list of file\n");
+		exit(1);
+	}
 
-	while(*)
+	if (fplex_init(&scan)) 
+	{
+		//couldn't initialize
+		return;
+	}
 
-	parse_args(size, arguments);
-		
+	st = fp_scan_string(text, scan); //tokenize source_code
+
+	if (fpparse(&result, scan)) //retreive the AST from parser using tokenize string
+	{
+		//error parsing not your issue
+		return;
+	}
+
+	fp_delete_buffer(st, scan);
+	fplex_destroy(scan);
+
+	size = linked_list_size(result);
+	arguments = (char**)malloc((size + 1) * sizeof(char*));
+	arguments[0] = progname; 
+
+
+	for(i = 1; i <= size; i++)
+		arguments[i] = (char*)linked_list_get_nth(result, i - 1);
+
+	del_linked_list(result);	
+
+	parse_args(0, size + 1, arguments);
+
+	free(arguments);
 	free(text);
 	
 }
 
-void parse_args(int argc, char **argv)
+void parse_args(unsigned char file_req, int argc, char **argv)
 {
 	size_t i = 1;
 	while(i < argc)
@@ -278,9 +318,7 @@ void parse_args(int argc, char **argv)
 		else if(!strcmp(argv[i], "-cf"))
 		{
 			if(i != argc - 1)	
-			{
-				//call func to process the cf file	
-			}
+				parse_file(argv[0], argv[++i]);
 			else
 			{
 				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! expected string after -cf option\n") + 1));
@@ -291,6 +329,7 @@ void parse_args(int argc, char **argv)
 				exit(1);
 			}
 		}
+	
 		else
 		{
 			if(i == argc - 1)
@@ -307,7 +346,7 @@ void parse_args(int argc, char **argv)
 		}
 		i++;
 	}
-	if(!strcmp(filename, ""))
+	if(file_req && !strcmp(filename, ""))
 	{
 		fsm_log(error, "Error! an FSM filename analyize is expected!\n");
 		print_help(argv[0]);
@@ -347,7 +386,7 @@ int main(int argc, char **argv)
 	max_length = 0;
 	filename = "";
 
-	parse_args(argc, argv);
+	parse_args(1, argc, argv);
 	
 //	if(log_type == none)
 //		log_type = local;
@@ -361,12 +400,12 @@ int main(int argc, char **argv)
 	}
 
 	fsm = getFSM(input);
-	
+
 	free(input);
 	
 	if(!fsm)
 	{
-		fsm_log(error, "Error! Parse error in the file!");
+		fsm_log(error, "Error! Parse error in the file!\n");
 		exit(1);
 	}
 

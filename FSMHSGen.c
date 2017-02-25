@@ -88,6 +88,7 @@ size_t max_time;
 size_t max_mem;
 size_t max_length;
 char *filename;	
+unsigned char hslm = 0, ndsm = 0, nosm = 0, psm = 0;
 
 void print_help(char *progname)
 {
@@ -329,7 +330,14 @@ void parse_args(unsigned char file_req, int argc, char **argv)
 				exit(1);
 			}
 		}
-	
+		else if(!strcmp(argv[i], "-psm"))
+			psm=1;	
+		else if(!strcmp(argv[i], "-ndsm"))
+			ndsm=1;	
+		else if(!strcmp(argv[i], "-nosm"))
+			nosm=1;	
+		else if(!strcmp(argv[i], "-hslm"))
+			hslm=1;	
 		else
 		{
 			if(i == argc - 1)
@@ -364,8 +372,7 @@ void hs(fsm_arr *fsm)
 		exit(1);
 	}
 	
-	//for (j = 0; j < fsm->maxS; j++)
-	for (j = 0; j < 4; j++)
+	for (j = 0; j < fsm->maxS; j++)
 		integer_set_add(initial_states, j);
 	
 	display_hs(fsm, initial_states, stdout);
@@ -409,9 +416,11 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	//print_fsm_arr(fsm);
+//	print_fsm_arr(fsm);
 
 	hs(fsm);
+
+	metrics(fsm);
 	
 	delete_fsm_arr(fsm);
 

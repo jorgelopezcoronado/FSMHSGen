@@ -344,7 +344,7 @@ BOOL linked_list_add_unique(linked_list *ll, void *element, char (*compare)(void
 	while(aux)
 	{
 		if(!compare(aux->element, element))
-			return TRUE;
+			return FALSE;
 		aux = aux->next;
 	}
 	return linked_list_add(ll, element);

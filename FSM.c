@@ -163,6 +163,18 @@ void set_maxt(fsm_ll *machine, size_t trans)
 	machine->maxT = trans;
 }
 
+char comp_trans(void *el1, void *el2)
+{
+	size_t one = *((size_t*)el1);
+	size_t two = *((size_t*)el2);
+	if (one < two)
+		return (char)-1;
+	else if(one > two)
+		return (char)1;
+	else
+		return (char)0;	
+}
+
 /*
  * add_fsm_ll_transition: adds a trnsition to the given FSM
  * */
@@ -248,7 +260,7 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
 	
 	//printf("m size=%llu maxs=%llu maxi=%llu\n", machine->size, machine->maxS, machine->maxI);
 	
-	if(!linked_list_add(machine->si[index], transition_ptr))
+	if(!linked_list_add_unique(machine->si[index], transition_ptr, comp_trans))
 	{
 		logmsg =(char*)malloc(400*sizeof(char));
 		if(sprintf(logmsg, "Warning! unable to add transition (s=%llu,i=%llu,n=%llu,o=%llu)! \n", state, input, next_state, output) < 0)
@@ -256,6 +268,7 @@ void add_fsm_ll_transition (fsm_ll *machine, size_t state, size_t input, size_t 
 		else 
 			fsm_log(warning, logmsg);
 		free(logmsg);
+		return;
 
 	}
 

@@ -378,6 +378,36 @@ void display_hs_preset_derivation(fsm_arr *fsm, linked_list *initial_level, FILE
 	
 			//check for HS rules
 			size_t spent_time = (clock() - initial_time) / CLOCKS_PER_SEC;
+			
+
+			if(max_length && level > max_length) //default truncating rule for the tree, in exception of max_level being 0
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Reached Max depth = %llu with sequence %s\n", level, sequence) + 1));
+				sprintf(msg, "Reached Max depth = %llu with sequence %s\n", level,  sequence);
+				fsm_log(info, msg);
+				free(msg);
+				return;	
+			}
+	
+			if(max_time && spent_time > max_time) //we finish inmediatelly, sorry :) 
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing sequence time expired: current time= %llu, max time = %llu\n", spent_time, max_time) + 1));
+				sprintf(msg, "Homing sequence time expired: current time= %llu, max time = %llu\n", spent_time, max_time);
+				fsm_log(info, msg);
+				free(msg);
+				return;	
+			}
+
+			if(max_mem && used_mem > max_mem) //we finish inmediatelly, sorry :) 
+			/*2do: implement mem counter... aux functions that calculates frees and mallocs instead of directly calling them*/
+			{
+				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing sequence memory limit reached: current usage= %llu, max mem = %llu\n", used_mem, max_mem) + 1));
+				sprintf(msg, "Homing sequence memory limit reached: current usage= %llu, max mem = %llu\n", used_mem, max_mem);
+				fsm_log(info, msg);
+				free(msg);
+				return;	
+			}
+			//in here, we continue, i.e., we derive the next level based on the i-succ of nodes
 			if(state_subsets_are_singletons(sss)) //Found a HS
 			{	
 				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing Sequence Found: %s\n", sequence) + 1));
@@ -388,41 +418,6 @@ void display_hs_preset_derivation(fsm_arr *fsm, linked_list *initial_level, FILE
 				minlength_of_HSs = (minlength_of_HSs > level || !minlength_of_HSs)?level:minlength_of_HSs; 
 				HS_counter++;
 			}
-
-			if(max_length && level >= max_length) //default truncating rule for the tree, in exception of max_level being 0
-			{
-				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Reached Max depth = %llu with sequence %s\n", level, sequence) + 1));
-				sprintf(msg, "Reached Max depth = %llu with sequence %s\n", level,  sequence);
-				fsm_log(info, msg);
-				free(msg);
-				return;
-			}
-	
-			if(max_time && spent_time >= max_time) //we finish inmediatelly, sorry :) 
-			{
-				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing sequence time expired: current time= %llu, max time = %llu\n", spent_time, max_time) + 1));
-				sprintf(msg, "Homing sequence time expired: current time= %llu, max time = %llu\n", spent_time, max_time);
-				fsm_log(info, msg);
-				free(msg);
-
-				//metric on HS length print LHSM = minlength_of_HSs depending on certain flag	
-	
-				exit(0);//normal exit, time expired but forseen
-			}
-
-			if(max_mem && used_mem >= max_mem) //we finish inmediatelly, sorry :) 
-			{
-				char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Homing sequence memory limit reached: current usage= %llu, max mem = %llu\n", used_mem, max_mem) + 1));
-				sprintf(msg, "Homing sequence memory limit reached: current usage= %llu, max mem = %llu\n", used_mem, max_mem);
-				fsm_log(info, msg);
-				free(msg);
-
-				//metric on HS length print LHSM = minlength_of_HSs depending on certain flag	
-	
-				exit(0);//normal exit, time expired but forseen
-			}
-
-			//in here, we continue, i.e., we derive the next level based on the i-succ of nodes
 
 			inputs = defined_inputs(fsm, sss); 
 			for(i = 0; i < fsm->maxI; i++)
@@ -451,7 +446,7 @@ void display_hs_preset_derivation(fsm_arr *fsm, linked_list *initial_level, FILE
 					linked_list_add(next_level, isucc_node);
 				}
 			}	
-	
+
 			free(inputs);
 
 			//delete current node (already analyzed and we are not checking shortest squences)
@@ -499,8 +494,8 @@ void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 	{
 		if(aux->number >= fsm->maxS)
 		{
-			char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! initial state %llu is greater or equal than FSM max state = %llu", aux->number, fsm->maxS ) + 1));
-			sprintf(msg, "Error! initial state %llu is greater or equal than FSM max state = %llu", aux->number, fsm->maxS);
+			char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "Error! initial state %llu is greater or equal than FSM max state = %llu\n", aux->number, fsm->maxS ) + 1));
+			sprintf(msg, "Error! initial state %llu is greater or equal than FSM max state = %llu\n", aux->number, fsm->maxS);
 			fsm_log(error, msg);
 			free(msg);
 			return;
@@ -531,11 +526,11 @@ void display_hs (fsm_arr *fsm, integer_set *init_states, FILE *fd)
 	//call the hs process
 	display_hs_preset_derivation(fsm, init_level, fd);
 	
-	if (HS_counter == 0);
+	if (!HS_counter)
 	{
 		char *str_is = integer_set_to_string(init_states);
-		char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "There is no homing sequence (using the current parameters parameters for the initial state subset %s\n", str_is ) + 1));
-		sprintf(msg, "There is no homing sequence (using the current parameters parameters for the initial state subset %s\n", str_is);
+		char *msg = (char*)malloc(sizeof(char)*(snprintf(NULL, 0, "There is no homing sequence (using the current parameters parameters) for the initial state subset %s\n", str_is ) + 1));
+		sprintf(msg, "There is no homing sequence (using the current parameters parameters) for the initial state subset %s\n", str_is);
 		printf("%s", msg);
 		fsm_log(info, msg);
 		free(str_is);	

@@ -1,5 +1,5 @@
 MAIN=FSMHSGen
-STRUCTS=helpers.c helpers.h linked_list_node.h linked_list.c linked_list.h  FSM.c FSM.h integer_set.h integer_set.c FSM_Gedanken_experiments.c FSM_Gedanken_experiments.h 
+STRUCTS=helpers.c helpers.h linked_list_node.h linked_list.c linked_list.h  FSM.c FSM.h integer_set.h integer_set.c FSM_Gedanken_experiments.c FSM_Gedanken_experiments.h specification_metrics.h specification_metrics.c 
 PARSER=lexer.c parser.c fpl.c fpp.c
 FLAGS=-g -std=gnu89 
 
@@ -19,6 +19,7 @@ c: parser $(PARSER) $(MAIN).c $(STRUCTS)
 	gcc $(FLAGS) -c FSM.c
 	gcc $(FLAGS) -c integer_set.c
 	gcc $(FLAGS) -c FSM_Gedanken_experiments.c
+	gcc $(FLAGS) -c specification_metrics.c
 	gcc $(FLAGS) -o $(MAIN) *.o $(PARSER) $(MAIN).c
 
 clean: 

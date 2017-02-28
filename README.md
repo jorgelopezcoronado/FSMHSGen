@@ -207,7 +207,83 @@ p 10
 The corresponding FSM is shown in the following figure.
 
 ![Example FSM](/images/ExFSM.jpg)
-Format: ![Example FSM](https://github.com/jorgelopezcoronado/FSMHSGen/images/ExFSM.jpg)
+
+As an example, the output of the program assuming execution example, and the input file the previously described FSM, the program produces the following output:
+_FSMHSGen -cf fsmhsgen.conf -ml 4 test.fsm
+
+HS: 2.2
+
+HS: 2.0.2
+
+HS: 2.1.2
+
+HS: 2.2.2
+
+HS: 2.2.1
+
+HS: 2.2.0
+
+HS: 1.2.2
+
+HS: 1.2.0.2
+
+HS: 1.2.1.2
+
+HS: 1.2.2.2
+
+HS: 1.2.2.1
+
+HS: 1.2.2.0
+
+HS: 1.1.2.2
+
+HS: 2.2.0.2
+
+HS: 2.2.0.1
+
+HS: 2.2.1.2
+
+HS: 2.2.1.1
+
+HS: 2.2.2.2
+
+HS: 2.2.2.1
+
+HS: 2.2.2.0
+
+HS: 2.1.1.2
+
+HS: 2.1.2.2
+
+HS: 2.1.2.1
+
+HS: 2.0.0.2
+
+HS: 2.0.1.2
+
+HS: 2.0.2.2
+
+HS: 2.0.2.1
+
+HS: 2.0.2.0
+
+PSM = 0.1 (1 / 10)
+
+NDSM = 0.4 (4 / 10)
+
+NOSM = 0.1 (1 / 10)
+
+HSLM = 2
+_
+
+##References
+
+[1] Natalia Kushik, Jorge López, Ana Cavalli, Nina Yevtushenko: “Improving Protocol Passive Testing through ‘Gedanken’ Experiments with Finite State Machines”,  in the proceedings of the IEEE International Conference on Software Quality, Reliability and Security, QRS, Vienna, Austria, 2016.
+
+
+[2] Rainer Gerhards: “The Syslog protocol”, Request for Comments (RFC) 5424, DOI: 10.17487/rfc5424, 2015.
+
+
 
 
 

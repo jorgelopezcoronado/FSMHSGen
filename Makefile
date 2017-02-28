@@ -1,7 +1,8 @@
 MAIN=FSMHSGen
 STRUCTS=helpers.c helpers.h linked_list_node.h linked_list.c linked_list.h  FSM.c FSM.h integer_set.h integer_set.c FSM_Gedanken_experiments.c FSM_Gedanken_experiments.h specification_metrics.h specification_metrics.c 
 PARSER=lexer.c parser.c fpl.c fpp.c
-FLAGS=-g -std=gnu89 
+FLAGS=-O3 
+#FLAGS=-g -std=gnu89 
 
 all: c
 

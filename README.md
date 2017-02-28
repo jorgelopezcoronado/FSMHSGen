@@ -209,7 +209,7 @@ The corresponding FSM is shown in the following figure.
 ![Example FSM](/images/ExFSM.jpg)
 
 As an example, the output of the program assuming execution example, and the input file the previously described FSM, the program produces the following output:
-_FSMHSGen -cf fsmhsgen.conf -ml 4 test.fsm
+_FSMHSGen -cf fsmhsgen.conf -ml 4 test.fsm_
 
 HS: 2.2
 
@@ -274,7 +274,6 @@ NDSM = 0.4 (4 / 10)
 NOSM = 0.1 (1 / 10)
 
 HSLM = 2
-_
 
 ##References
 

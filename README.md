@@ -86,7 +86,9 @@ _FSMHSGen -cf fsmhsgen.conf -ml 4 inputFSM.fsm_
 And the fsmhsgen.conf file contains:
 
 \##################################
+
 \## Simple FSMHSGen configuration file ##
+
 \##################################
 
 \# Maximal amount of memory to use
@@ -102,12 +104,15 @@ MaxTime=10
 MaxHSLength=0
 
 \# Type of logging
+
 LogType=syslog # local syslog 
 
 \# Log level
+
 LogLevel=7 # debug, log all
 
 \# hslm \# ndsm \# psm \# nosm
+
 hslm=true
 ndsm=true
 psm=true

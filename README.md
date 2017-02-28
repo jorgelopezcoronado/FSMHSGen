@@ -84,7 +84,7 @@ Assume the tool is called with the following parameters:
 _FSMHSGen -cf fsmhsgen.conf -ml 4 inputFSM.fsm_
 
 And the fsmhsgen.conf file contains:
-
+_
 \##################################
 
 \## Simple FSMHSGen configuration file ##
@@ -114,7 +114,99 @@ LogLevel=7 # debug, log all
 \# hslm \# ndsm \# psm \# nosm
 
 hslm=true
+
 ndsm=true
+
 psm=true
+
 nosm=true
+_
+
+With the previous configuration parameters, the tool will run until the input sequences under evaluation reach the length of 4 or 10 seconds have passed, it will also compute all the complexity of the specification metrics. Note that the configuration file parameter is overwritten by the command line parameter since it appears later. Finally, note that the configuration file is case insensitive, but the command line parameters are case sensitive.
+
+###FSM file format
+
+The FSM file format is a very simple format used to describe an FSM. An FSM M is formally a tuple (S, I, O, hs, S’), where S is a finite nonempty set of states with a nonempty subset S' of initial states; I and O are finite input and output alphabets; hs is a transition relation in the Cartesian product SxIxOxS. In order to describe such object, the “.fsm” file format is composed of two main parts. The first part contains the information about the proper sets of the FSM. It assumes all labels of the set are numbered in order, and starting from 0. For example, the header: “S 4 I 3 O 2” defines an FSM with 4 states (labeled by “0”, “1”, “2”, “3”), three inputs (labeled by “0”, “1”, “2”), and two outputs (labeled by “0”, “1”). The second part of the file format contains the listing of the elements of the transition relation, in the format s i s’ o, where s is the current state, i is the input, s’ is the next state, and o is the output. For example, “0 2 3 1” defines a transition from state “0”, with input “2”, output “1” to state “3”. Finally, coments in the FSM file format are allowed after the sequence “//” and until the end of the line. Following is a list of header tags, and their allowed values.
+
+
+
+####F
+
+F must be at the beginning of the FSM file, it defines the type of FSM. Our software does not take into consideration the value of F, however, certain tools might rely on this option to optimize the treatment of the machine. At the moment, the tool parses any number following the F specification, example: F 3. 
+
+
+
+####s
+
+s defines the number of states of the FSM. This tag should be followed by a number, example S 4.
+
+
+
+####i
+
+i defines the number of inputs of the FSM. This tag should be followed by a number, example I 4.
+
+
+
+####o
+
+o defines the number of output of the FSM. This tag should be followed by a number, example O 3.
+
+
+
+####n0
+
+n0 defines the initial state of the FSM. This tag should be followed by a number, example n0 3.
+
+
+
+####p
+
+p defines the total number of transitions. This tag should be followed by a number, example p 13, this implies the transition relation has 13 elements. In order to describe each of the elements (or transitions) is explained below.
+
+
+
+####Transitions
+
+As explained before, each transition is composed by four numbers, representing the current state, the input, the output, and the next state respectfully. As an example, “0 2 3 1” defines a transition from state “0”, with input “2”, output “1” to state “3”.
+
+An example FSM file is given below:
+
+_
+F 3 
+
+s 3
+
+i 3
+
+o 2
+
+n0 0
+
+p 10 
+
+//transitions start here 
+
+0 1 1 1
+
+0 2 2 0
+
+1 0 2 0
+
+1 1 1 0
+
+1 1 0 1
+
+1 2 1 0
+
+2 0 2 0
+
+2 1 2 0
+
+2 0 1 0
+
+2 2 1 1
+
+
+_
 

@@ -1,0 +1,16 @@
+F 3 //this is dangerous, it screams modify me and make software behave weirdly... I'd remove this param from the FSM spec... which is nowhere standardized, BTW
+s 3
+i 3
+o 2
+n0 0
+p 10 //what if the n of transitions is not correct? let's say, there are less than stated 
+0 1 1 1
+0 2 2 0
+1 0 2 0
+1 1 1 0
+1 1 0 1
+1 2 1 0
+2 0 2 0
+2 1 2 0
+2 0 1 0
+2 2 1 1

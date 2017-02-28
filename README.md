@@ -84,17 +84,21 @@ Assume the tool is called with the following parameters:
 _FSMHSGen -cf fsmhsgen.conf -ml 4 inputFSM.fsm_
 
 And the fsmhsgen.conf file contains:
+
 \##################################
 \## Simple FSMHSGen configuration file ##
 \##################################
 
 \# Maximal amount of memory to use
+
 MaxMemSize=0 #(unlimited)
 
 \# Maximal time allowed to execute the experiment, 10s
+
 MaxTime=10
 
 \# Maximal HS length
+
 MaxHSLength=0
 
 \# Type of logging

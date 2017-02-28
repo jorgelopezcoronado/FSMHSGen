@@ -84,7 +84,6 @@ Assume the tool is called with the following parameters:
 _FSMHSGen -cf fsmhsgen.conf -ml 4 inputFSM.fsm_
 
 And the fsmhsgen.conf file contains:
-_
 \##################################
 
 \## Simple FSMHSGen configuration file ##
@@ -120,7 +119,6 @@ ndsm=true
 psm=true
 
 nosm=true
-_
 
 With the previous configuration parameters, the tool will run until the input sequences under evaluation reach the length of 4 or 10 seconds have passed, it will also compute all the complexity of the specification metrics. Note that the configuration file parameter is overwritten by the command line parameter since it appears later. Finally, note that the configuration file is case insensitive, but the command line parameters are case sensitive.
 
@@ -172,7 +170,6 @@ As explained before, each transition is composed by four numbers, representing t
 
 An example FSM file is given below:
 
-_
 F 3 
 
 s 3
@@ -207,6 +204,10 @@ p 10
 
 2 2 1 1
 
+The corresponding FSM is shown in the following figure.
 
-_
+![Example FSM](/images/ExFSM.jpg)
+Format: ![Example FSM](https://github.com/jorgelopezcoronado/FSMHSGen/images/ExFSM.jpg)
+
+
 

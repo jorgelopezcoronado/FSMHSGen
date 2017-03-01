@@ -36,6 +36,7 @@ integer_set *create_integer_set()
 		return NULL;
 
 	set->head = NULL;
+	return set;
 }
 
 /*
